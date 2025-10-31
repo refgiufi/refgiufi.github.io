@@ -35,12 +35,17 @@ jobs:
           };
           
           // Development fallback (will be overridden in production)
-          if (!window.SUPABASE_CONFIG.url || !window.SUPABASE_CONFIG.anonKey) {
-            console.warn('Production config not loaded, using development mode');
+          if (!window.SUPABASE_CONFIG.url || !window.SUPABASE_CONFIG.anonKey || 
+              window.SUPABASE_CONFIG.url === 'YOUR_SUPABASE_URL_HERE' ||
+              window.SUPABASE_CONFIG.anonKey === 'YOUR_SUPABASE_ANON_KEY_HERE') {
+            console.warn('🔧 Production config not loaded, using development mode');
+            console.log('💡 Make sure GitHub Secrets are set: SUPABASE_URL and SUPABASE_ANON_KEY');
             window.SUPABASE_CONFIG = {
-              url: 'https://your-project.supabase.co',
-              anonKey: 'your-anon-key-here'
+              url: 'YOUR_SUPABASE_URL_HERE',
+              anonKey: 'YOUR_SUPABASE_ANON_KEY_HERE'
             };
+          } else {
+            console.log('✅ Production config loaded from GitHub Actions');
           }
           EOF
 

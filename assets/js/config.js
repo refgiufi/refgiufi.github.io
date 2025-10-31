@@ -11,4 +11,13 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   console.log('🔧 Development mode detected');
   console.log('💡 To test locally, replace the values above with your actual Supabase credentials');
   console.log('🚀 In production, GitHub Actions will inject the real credentials securely');
+} else {
+  // Production mode - check if GitHub Actions injected real values
+  if (window.SUPABASE_CONFIG.url === 'YOUR_SUPABASE_URL_HERE' || 
+      window.SUPABASE_CONFIG.anonKey === 'YOUR_SUPABASE_ANON_KEY_HERE') {
+    console.error('❌ GitHub Actions config injection failed!');
+    console.log('🔧 Check: 1) GitHub Secrets are set, 2) GitHub Pages source = GitHub Actions, 3) Workflow ran successfully');
+  } else {
+    console.log('✅ GitHub Actions config loaded successfully');
+  }
 }
