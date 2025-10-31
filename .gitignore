@@ -1,11 +1,8 @@
 # Dependencies
 node_modules/
 
-# Environment files (keep credentials safe)
-.env
-.env.local
-.env.production
-.env.development
+# Development config (keep credentials safe)
+dev-config.js
 
 # Logs
 *.log

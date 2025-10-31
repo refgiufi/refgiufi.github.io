@@ -167,6 +167,14 @@
     </div>
   </div>
 
+  <!-- Development Config (only loads in development, gitignored) -->
+  <script>
+    // Try to load development config (will fail silently in production)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      document.write('<script src="../dev-config.js"><\/script>');
+    }
+  </script>
+  
   <!-- Supabase Configuration (injected by GitHub Actions) -->
   <script src="../assets/js/config.js"></script>
   

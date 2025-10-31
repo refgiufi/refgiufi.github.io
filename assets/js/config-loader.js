@@ -28,17 +28,12 @@ class ConfigLoader {
   async loadDevelopmentConfig() {
     console.log('🔧 Loading development configuration...');
     
-    // Try to load from .env.local file
-    try {
-      const envResponse = await fetch('.env.local');
-      if (envResponse.ok) {
-        const envText = await envResponse.text();
-        this.parseEnvFile(envText);
-        console.log('✅ Loaded config from .env.local');
-        return;
-      }
-    } catch (error) {
-      console.log('ℹ️ .env.local not found, trying localStorage...');
+    // Try to load from local config script (if exists)
+    if (window.DEV_CONFIG) {
+      this.config.url = window.DEV_CONFIG.SUPABASE_URL;
+      this.config.anonKey = window.DEV_CONFIG.SUPABASE_ANON_KEY;
+      console.log('✅ Loaded config from dev-config.js');
+      return;
     }
     
     // Fallback to localStorage
@@ -53,7 +48,7 @@ class ConfigLoader {
     }
     
     console.log('⚠️ No development config found. Please:');
-    console.log('1. Create .env.local file with your credentials, OR');
+    console.log('1. Create dev-config.js file with your credentials, OR');
     console.log('2. Use the configuration panel in admin interface');
   }
 
@@ -79,23 +74,6 @@ class ConfigLoader {
     
     console.error('❌ Production config injection failed!');
     console.log('🔧 Check GitHub Secrets and workflow deployment');
-  }
-
-  parseEnvFile(envText) {
-    const lines = envText.split('\n');
-    const env = {};
-    
-    lines.forEach(line => {
-      line = line.trim();
-      if (line && !line.startsWith('#')) {
-        const [key, ...valueParts] = line.split('=');
-        const value = valueParts.join('=').trim();
-        env[key.trim()] = value.replace(/^['"]|['"]$/g, ''); // Remove quotes
-      }
-    });
-    
-    this.config.url = env.SUPABASE_URL;
-    this.config.anonKey = env.SUPABASE_ANON_KEY;
   }
 
   validateConfig() {
