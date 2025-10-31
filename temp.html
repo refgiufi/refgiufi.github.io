@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase CRUD Testing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .status-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .data-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Supabase CRUD Testing</h1>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Connecting to Supabase...</span>
+            </div>
+            <button class="btn btn-primary" onclick="testConnection()">Test Connection</button>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alertContainer"></div>
+
+        <!-- Configuration Section -->
+        <div class="card">
+            <h2>⚙️ Supabase Configuration</h2>
+            <div class="alert alert-info show">
+                <strong>Setup Instructions:</strong>
+                <ol style="margin-top: 10px; margin-left: 20px;">
+                    <li>Buka <a href="https://supabase.com" target="_blank">supabase.com</a> dan buat akun gratis</li>
+                    <li>Klik "New Project" dan isi detail project Anda</li>
+                    <li>Tunggu hingga database siap (sekitar 2 menit)</li>
+                    <li>Masuk ke Settings → API untuk mendapatkan URL dan anon key</li>
+                    <li>Copy-paste URL dan Key ke form di bawah</li>
+                    <li>Klik "Save Configuration"</li>
+                </ol>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="supabaseUrl">Supabase URL</label>
+                    <input type="text" id="supabaseUrl" placeholder="https://xxxxx.supabase.co">
+                </div>
+                <div class="form-group">
+                    <label for="supabaseKey">Supabase Anon Key</label>
+                    <input type="text" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="saveConfig()">💾 Save Configuration</button>
+            <button class="btn btn-warning" onclick="createTable()">🗂️ Create Sample Table</button>
+        </div>
+
+        <!-- Create/Update Form -->
+        <div class="card">
+            <h2>➕ Create / Update Data</h2>
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label for="name">Name *</label>
+                <input type="text" id="name" placeholder="Enter name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" placeholder="Enter email" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" placeholder="Enter description"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="createData()" id="submitBtn">
+                ✨ Create Data
+            </button>
+            <button class="btn btn-warning" onclick="cancelEdit()" id="cancelBtn" style="display: none;">
+                ❌ Cancel Edit
+            </button>
+        </div>
+
+        <!-- Data List -->
+        <div class="card">
+            <h2>📋 Data List</h2>
+            <button class="btn btn-primary" onclick="readData()">🔄 Refresh Data</button>
+            <div id="dataContainer">
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                    <p>No data available. Click "Refresh Data" to load.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        let supabase = null;
+        const TABLE_NAME = 'users'; // Nama tabel yang akan digunakan
+
+        // Initialize Supabase client
+        function initSupabase() {
+            const url = localStorage.getItem('supabaseUrl');
+            const key = localStorage.getItem('supabaseKey');
+            
+            if (url && key) {
+                supabase = window.supabase.createClient(url, key);
+                document.getElementById('supabaseUrl').value = url;
+                document.getElementById('supabaseKey').value = key;
+                updateStatus(true, 'Connected to Supabase');
+                return true;
+            } else {
+                updateStatus(false, 'Configuration needed');
+                return false;
+            }
+        }
+
+        // Save configuration
+        function saveConfig() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            
+            if (!url || !key) {
+                showAlert('Please fill in both URL and Key', 'error');
+                return;
+            }
+            
+            localStorage.setItem('supabaseUrl', url);
+            localStorage.setItem('supabaseKey', key);
+            
+            if (initSupabase()) {
+                showAlert('Configuration saved successfully!', 'success');
+                testConnection();
+            }
+        }
+
+        // Test connection
+        async function testConnection() {
+            if (!supabase) {
+                showAlert('Please configure Supabase first', 'error');
+                return;
+            }
+            
+            try {
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) throw error;
+                
+                updateStatus(true, 'Connected to Supabase ✓');
+                showAlert('Connection successful!', 'success');
+            } catch (error) {
+                updateStatus(false, 'Connection failed');
+                showAlert('Connection error: ' + error.message, 'error');
+            }
+        }
+
+        // Create table (SQL query)
+        async function createTable() {
+            if (!supabase) {
+                showAlert('Please configure Supabase first', 'error');
+                return;
+            }
+
+            showAlert('Creating table... Silakan buka Supabase Dashboard → SQL Editor dan jalankan query berikut:<br><br>' +
+                '<code style="display:block;background:#f3f4f6;padding:15px;border-radius:5px;margin-top:10px;">' +
+                'CREATE TABLE IF NOT EXISTS users (<br>' +
+                '&nbsp;&nbsp;id BIGSERIAL PRIMARY KEY,<br>' +
+                '&nbsp;&nbsp;name TEXT NOT NULL,<br>' +
+                '&nbsp;&nbsp;email TEXT NOT NULL,<br>' +
+                '&nbsp;&nbsp;description TEXT,<br>' +
+                '&nbsp;&nbsp;created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()<br>' +
+                ');<br><br>' +
+                '-- Enable Row Level Security (RLS)<br>' +
+                'ALTER TABLE users ENABLE ROW LEVEL SECURITY;<br><br>' +
+                '-- Create policy untuk allow all operations (untuk testing)<br>' +
+                'CREATE POLICY "Allow all operations" ON users<br>' +
+                '&nbsp;&nbsp;FOR ALL USING (true) WITH CHECK (true);' +
+                '</code><br><br>' +
+                'Setelah menjalankan query di atas, klik "Refresh Data" untuk memverifikasi.', 'info');
+        }
+
+        // CREATE - Insert new data
+        async function createData() {
+            if (!supabase) {
+                showAlert('Please configure Supabase first', 'error');
+                return;
+            }
+
+            const editId = document.getElementById('editId').value;
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            if (!name || !email) {
+                showAlert('Name and Email are required', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+
+            try {
+                if (editId) {
+                    // UPDATE
+                    const { data, error } = await supabase
+                        .from(TABLE_NAME)
+                        .update({ name, email, description })
+                        .eq('id', editId)
+                        .select();
+
+                    if (error) throw error;
+                    showAlert('Data updated successfully!', 'success');
+                } else {
+                    // INSERT
+                    const { data, error } = await supabase
+                        .from(TABLE_NAME)
+                        .insert([{ name, email, description }])
+                        .select();
+
+                    if (error) throw error;
+                    showAlert('Data created successfully!', 'success');
+                }
+
+                // Clear form
+                document.getElementById('name').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('description').value = '';
+                document.getElementById('editId').value = '';
+                document.getElementById('submitBtn').innerHTML = '✨ Create Data';
+                document.getElementById('cancelBtn').style.display = 'none';
+
+                // Refresh data list
+                readData();
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // READ - Get all data
+        async function readData() {
+            if (!supabase) {
+                showAlert('Please configure Supabase first', 'error');
+                return;
+            }
+
+            const container = document.getElementById('dataContainer');
+            container.innerHTML = '<div class="empty-state"><span class="loading"></span><p>Loading data...</p></div>';
+
+            try {
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                            </svg>
+                            <p>No data found. Create your first entry above!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let tableHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Description</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                data.forEach(item => {
+                    const date = new Date(item.created_at).toLocaleString();
+                    tableHTML += `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.email}</td>
+                            <td>${item.description || '-'}</td>
+                            <td>${date}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-warning btn-small" onclick="editData(${item.id})">
+                                        ✏️ Edit
+                                    </button>
+                                    <button class="btn btn-danger btn-small" onclick="deleteData(${item.id})">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = tableHTML;
+                showAlert(`Loaded ${data.length} record(s)`, 'success');
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p style="color: #ef4444;">Error loading data: ${error.message}</p>
+                    </div>
+                `;
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        // UPDATE - Edit data (populate form)
+        async function editData(id) {
+            if (!supabase) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('editId').value = data.id;
+                document.getElementById('name').value = data.name;
+                document.getElementById('email').value = data.email;
+                document.getElementById('description').value = data.description || '';
+                document.getElementById('submitBtn').innerHTML = '💾 Update Data';
+                document.getElementById('cancelBtn').style.display = 'inline-block';
+
+                // Scroll to form
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showAlert('Editing mode: Modify the data and click "Update Data"', 'info');
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            document.getElementById('editId').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('submitBtn').innerHTML = '✨ Create Data';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        // DELETE - Remove data
+        async function deleteData(id) {
+            if (!confirm('Are you sure you want to delete this data?')) return;
+            if (!supabase) return;
+
+            try {
+                const { error } = await supabase
+                    .from(TABLE_NAME)
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showAlert('Data deleted successfully!', 'success');
+                readData();
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Update status indicator
+        function updateStatus(connected, message) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            if (connected) {
+                dot.classList.add('connected');
+            } else {
+                dot.classList.remove('connected');
+            }
+            
+            text.textContent = message;
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} show`;
+            alertDiv.innerHTML = message;
+            
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 300);
+            }, 5000);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
+        });
+    </script>
+</body>
+</html>
