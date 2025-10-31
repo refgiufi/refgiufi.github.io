@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Supabase Auth + RLS</title>
+  <style>
+    :root {
+      --bg1:#0f172a; --bg2:#111827; --card:#0b1220; --muted:#94a3b8; --brand:#6366f1; --brand2:#8b5cf6; --ok:#10b981; --warn:#f59e0b; --err:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Helvetica,Arial,sans-serif;background:radial-gradient(1200px 800px at 10% -10%,#1f2937 0%,transparent 60%), radial-gradient(1000px 700px at 110% -20%,#0f172a 0%,transparent 60%), linear-gradient(180deg,var(--bg1),var(--bg2));color:#e5e7eb;min-height:100dvh}
+    .wrap{max-width:1200px;margin:0 auto;padding:24px}
+    .top{display:flex;gap:16px;justify-content:space-between;align-items:center}
+    .title{font-size:22px;font-weight:700}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .pad{padding:20px}
+    .muted{color:var(--muted)}
+    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:600;color:white;background:linear-gradient(135deg,var(--brand),var(--brand2));cursor:pointer;transition:transform .15s, box-shadow .15s}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(99,102,241,.3)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.15)}
+    .btn-danger{background:linear-gradient(135deg,#f43f5e,#ef4444)}
+    .grid{display:grid;gap:16px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns: 2fr 3fr}
+    @media (max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+    input,textarea,select{width:100%;background:#0b1020;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#e5e7eb;padding:12px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top}
+    th{color:#c7d2fe;text-align:left}
+    .kpi{display:flex;gap:12px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid rgba(255,255,255,.15)}
+    .ok{color:#10b981}
+    .warn{color:#f59e0b}
+    .err{color:#ef4444}
+    .center{text-align:center}
+    .right{text-align:right}
+    .hidden{display:none !important}
+    .notice{background:#0a1427;border:1px dashed rgba(255,255,255,.2);border-radius:12px;padding:12px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">Admin Dashboard</div>
+      <div>
+        <button id="btnLogout" class="btn btn-ghost hidden">Keluar</button>
+      </div>
+    </div>
+
+    <!-- Login Panel -->
+    <div id="loginPanel" class="card pad" style="margin-top:16px">
+      <h2 style="margin:0 0 8px">Masuk Admin</h2>
+      <p class="muted" style="margin:0 0 16px">Gunakan akun admin yang dibuat di Supabase Auth.</p>
+      <div class="grid g2">
+        <div>
+          <label>Email</label>
+          <input id="loginEmail" type="email" placeholder="admin@domain.com" />
+        </div>
+        <div>
+          <label>Password</label>
+          <input id="loginPassword" type="password" placeholder="••••••••" />
+        </div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px">
+        <button id="btnLogin" class="btn">Masuk</button>
+        <button id="btnTest" class="btn btn-ghost" title="Cek kredensial Supabase">Tes Koneksi</button>
+      </div>
+      <div id="loginMsg" class="muted" style="margin-top:10px"></div>
+      <div class="notice" style="margin-top:12px">
+        <b>Konfigurasi:</b> Edit konstanta SUPABASE_URL dan SUPABASE_ANON_KEY di bagian bawah file ini. Untuk production, simpan di environment/backend.
+      </div>
+    </div>
+
+    <!-- Not admin -->
+    <div id="notAdmin" class="card pad hidden" style="margin-top:16px">
+      <h3 style="margin:0 0 8px">Akses ditolak</h3>
+      <p class="muted">Anda berhasil login, namun tidak memiliki peran <b>admin</b>. Hubungi administrator untuk menaikkan peran Anda.</p>
+    </div>
+
+    <!-- Dashboard Panel -->
+    <div id="dash" class="hidden" style="margin-top:16px">
+      <div class="grid g3">
+        <div class="card pad">
+          <h3 style="margin:0 0 8px">Ringkasan</h3>
+          <div id="kpi" class="kpi muted">
+            <div><span class="badge">Total Records</span><div id="kpiTotal" style="font-size:22px;font-weight:700;margin-top:6px">-</div></div>
+            <div><span class="badge">User Aktif</span><div id="kpiUser" style="font-size:22px;font-weight:700;margin-top:6px">-</div></div>
+          </div>
+          <div style="margin-top:16px" class="notice mono">
+            Tabel: users (id, name, email, description, user_id, created_at)
+          </div>
+        </div>
+        <div class="card pad">
+          <h3 style="margin:0 0 8px">Tambah / Ubah Data</h3>
+          <input type="hidden" id="editId" />
+          <div class="grid g2">
+            <div>
+              <label>Nama</label>
+              <input id="fName" placeholder="Nama" />
+            </div>
+            <div>
+              <label>Email</label>
+              <input id="fEmail" placeholder="email@contoh.com" />
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <label>Deskripsi</label>
+            <textarea id="fDesc" rows="3" placeholder="Catatan..."></textarea>
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px">
+            <button id="btnSave" class="btn">Simpan</button>
+            <button id="btnCancel" class="btn btn-ghost hidden">Batal</button>
+          </div>
+          <div id="formMsg" class="muted" style="margin-top:10px"></div>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <h3 style="margin:0">Data "users"</h3>
+          <div style="display:flex;gap:8px">
+            <input id="search" placeholder="Cari nama/email..." style="max-width:260px" />
+            <button id="btnRefresh" class="btn btn-ghost">Refresh</button>
+          </div>
+        </div>
+        <div style="overflow:auto;margin-top:8px">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>Deskripsi</th>
+                <th class="right">Dibuat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr><td class="center" colspan="6" class="muted">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 1) ISI KREDENSIAL ANDA DI SINI (untuk demo; untuk produksi gunakan backend/env)
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+
+    // 2) KONFIGURASI DASAR
+    const TABLE = 'users';
+    let sb = null;     // supabase client
+    let me = null;     // user object
+    let isAdmin = false;
+
+    // Inisialisasi client
+    function init() {
+      if (!SUPABASE_URL.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
+        document.getElementById('loginMsg').textContent = 'Supabase URL/Key belum dikonfigurasi.';
+        return;
+      }
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // Util
+    const el = (id) => document.getElementById(id);
+    const setMsg = (id, t, cls='') => { const e=el(id); e.textContent=t; e.className=cls; };
+
+    // Auth handlers
+    async function login() {
+      setMsg('loginMsg','Memproses...');
+      try {
+        const { data, error } = await sb.auth.signInWithPassword({
+          email: el('loginEmail').value.trim(),
+          password: el('loginPassword').value
+        });
+        if (error) throw error;
+        me = data.user;
+        await checkAdmin();
+      } catch (e) { setMsg('loginMsg', 'Gagal login: '+e.message, 'err'); }
+    }
+
+    async function logout() {
+      await sb.auth.signOut();
+      me=null; isAdmin=false;
+      el('btnLogout').classList.add('hidden');
+      el('dash').classList.add('hidden');
+      el('notAdmin').classList.add('hidden');
+      el('loginPanel').classList.remove('hidden');
+    }
+
+    async function testConn(){
+      try {
+        const { error } = await sb.from(TABLE).select('count', { count:'exact', head:true });
+        if (error) throw error;
+        setMsg('loginMsg','Koneksi OK ✓','ok');
+      } catch (e) {
+        setMsg('loginMsg','Koneksi gagal: '+e.message,'err');
+      }
+    }
+
+    // Cek role admin via tabel profiles
+    async function checkAdmin() {
+      try {
+        const { data, error } = await sb
+          .from('profiles')
+          .select('role, username')
+          .eq('user_id', me.id)
+          .maybeSingle();
+        if (error) throw error;
+        isAdmin = !!(data && data.role === 'admin');
+        el('btnLogout').classList.remove('hidden');
+        el('loginPanel').classList.add('hidden');
+        if (!isAdmin) { el('notAdmin').classList.remove('hidden'); return; }
+        el('notAdmin').classList.add('hidden');
+        el('dash').classList.remove('hidden');
+        await loadData();
+        await loadKpi();
+      } catch (e) {
+        setMsg('loginMsg','Gagal memeriksa peran: '+e.message,'err');
+      }
+    }
+
+    // KPI
+    async function loadKpi(){
+      const { count, error } = await sb.from(TABLE).select('*', { count:'exact', head:true });
+      if (!error) el('kpiTotal').textContent = count ?? 0;
+      el('kpiUser').textContent = me?.email || '-';
+    }
+
+    // CRUD
+    async function loadData(query=''){
+      el('rows').innerHTML = '<tr><td class="center" colspan="6">Memuat...</td></tr>';
+      let req = sb.from(TABLE).select('*').order('created_at', { ascending:false });
+      if (query) req = req.ilike('name', `%${query}%`).or(`email.ilike.%${query}%`);
+      const { data, error } = await req;
+      if (error) {
+        el('rows').innerHTML = '<tr><td class="center err" colspan="6">'+error.message+'</td></tr>';
+        return;
+      }
+      if (!data || !data.length) { el('rows').innerHTML = '<tr><td class="center muted" colspan="6">Belum ada data</td></tr>'; return; }
+      el('rows').innerHTML = data.map(r=>`
+        <tr>
+          <td>${r.id}</td>
+          <td>${escapeHtml(r.name||'')}</td>
+          <td>${escapeHtml(r.email||'')}</td>
+          <td>${escapeHtml(r.description||'')}</td>
+          <td class="right">${new Date(r.created_at).toLocaleString()}</td>
+          <td>
+            <button class="btn btn-ghost" onclick='fillForm(${JSON.stringify(r).replace(/'/g,"&#39;")})'>Edit</button>
+            <button class="btn btn-danger" onclick='del(${r.id})'>Hapus</button>
+          </td>
+        </tr>`).join('');
+    }
+
+    function fillForm(r){
+      el('editId').value = r.id;
+      el('fName').value = r.name||'';
+      el('fEmail').value = r.email||'';
+      el('fDesc').value = r.description||'';
+      el('btnCancel').classList.remove('hidden');
+      el('fName').focus();
+    }
+
+    function clearForm(){
+      el('editId').value=''; el('fName').value=''; el('fEmail').value=''; el('fDesc').value='';
+      el('btnCancel').classList.add('hidden'); setMsg('formMsg','');
+    }
+
+    async function save(){
+      const id = el('editId').value;
+      const payload = { name: el('fName').value.trim(), email: el('fEmail').value.trim(), description: el('fDesc').value.trim() };
+      if (!payload.name || !payload.email) { setMsg('formMsg','Nama dan Email wajib diisi','warn'); return; }
+      try {
+        if (id) {
+          const { error } = await sb.from(TABLE).update(payload).eq('id', id);
+          if (error) throw error; setMsg('formMsg','Berhasil diperbarui','ok');
+        } else {
+          const { error } = await sb.from(TABLE).insert([{ ...payload, user_id: me.id }]);
+          if (error) throw error; setMsg('formMsg','Berhasil ditambahkan','ok');
+        }
+        clearForm(); loadData(el('search').value.trim()); loadKpi();
+      } catch (e) { setMsg('formMsg','Gagal simpan: '+e.message,'err'); }
+    }
+
+    async function del(id){
+      if (!confirm('Hapus data ini?')) return;
+      try { const { error } = await sb.from(TABLE).delete().eq('id', id); if (error) throw error; loadData(el('search').value.trim()); loadKpi(); }
+      catch(e){ alert('Gagal hapus: '+e.message); }
+    }
+
+    // Helpers
+    function escapeHtml(s){ return String(s).replace(/[&<>"]'/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+    // Events
+    window.addEventListener('DOMContentLoaded',()=>{
+      init();
+      el('btnLogin').addEventListener('click', login);
+      el('btnLogout').addEventListener('click', logout);
+      el('btnTest').addEventListener('click', testConn);
+      el('btnSave').addEventListener('click', save);
+      el('btnCancel').addEventListener('click', clearForm);
+      el('btnRefresh').addEventListener('click', ()=> loadData(el('search').value.trim()));
+      el('search').addEventListener('input', (e)=> loadData(e.target.value.trim()));
+    });
+  </script>
+</body>
+</html>
