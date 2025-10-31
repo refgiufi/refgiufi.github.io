@@ -49,6 +49,27 @@
       </div>
     </div>
 
+    <!-- Supabase Configuration (stored in localStorage, safer for GitHub Pages) -->
+    <div id="cfgPanel" class="card pad" style="margin-top:16px">
+      <h2 style="margin:0 0 8px">Konfigurasi Supabase</h2>
+      <p class="muted" style="margin:0 0 12px">Masukkan Project URL dan Anon Key. Nilai disimpan di browser Anda (localStorage), tidak di repo.</p>
+      <div class="grid g2">
+        <div>
+          <label>Supabase URL</label>
+          <input id="cfgUrl" placeholder="https://xxxxx.supabase.co" />
+        </div>
+        <div>
+          <label>Supabase Anon Key</label>
+          <input id="cfgKey" placeholder="eyJhbGciOi..." />
+        </div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px">
+        <button id="btnSaveCfg" class="btn">Simpan Konfigurasi</button>
+        <button id="btnClearCfg" class="btn btn-ghost">Hapus Konfigurasi</button>
+      </div>
+      <div id="cfgMsg" class="muted" style="margin-top:10px"></div>
+    </div>
+
     <!-- Login Panel -->
     <div id="loginPanel" class="card pad" style="margin-top:16px">
       <h2 style="margin:0 0 8px">Masuk Admin</h2>
@@ -157,14 +178,57 @@
     let sb = null;     // supabase client
     let me = null;     // user object
     let isAdmin = false;
+    let CFG = { url: null, key: null };
+
+    function loadCfg() {
+      // Prioritas: konstanta valid -> localStorage -> null
+      const constValid = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
+      if (constValid) {
+        CFG.url = SUPABASE_URL; CFG.key = SUPABASE_ANON_KEY;
+      } else {
+        const u = localStorage.getItem('sb_url');
+        const k = localStorage.getItem('sb_key');
+        CFG.url = (u && /^https:\/\/.*supabase\.co\/?$/.test(u)) ? u : null;
+        CFG.key = (k && k.length > 20) ? k : null;
+      }
+      const urlEl = document.getElementById('cfgUrl');
+      const keyEl = document.getElementById('cfgKey');
+      if (urlEl) urlEl.value = CFG.url || '';
+      if (keyEl) keyEl.value = CFG.key || '';
+      return !!(CFG.url && CFG.key);
+    }
+
+    function saveCfg() {
+      const u = document.getElementById('cfgUrl').value.trim();
+      const k = document.getElementById('cfgKey').value.trim();
+      if (!/^https:\/\/.*supabase\.co\/?$/.test(u) || k.length < 20) {
+        setMsg('cfgMsg','URL/Key tidak valid','err');
+        return false;
+      }
+      localStorage.setItem('sb_url', u);
+      localStorage.setItem('sb_key', k);
+      CFG.url = u; CFG.key = k;
+      setMsg('cfgMsg','Konfigurasi tersimpan ✓','ok');
+      init();
+      return true;
+    }
+
+    function clearCfg() {
+      localStorage.removeItem('sb_url');
+      localStorage.removeItem('sb_key');
+      CFG = { url: null, key: null };
+      setMsg('cfgMsg','Konfigurasi dihapus','warn');
+      init();
+    }
 
     // Inisialisasi client
     function init() {
-      if (!SUPABASE_URL.startsWith('http') || SUPABASE_ANON_KEY.length < 20) {
-        document.getElementById('loginMsg').textContent = 'Supabase URL/Key belum dikonfigurasi.';
+      const ok = loadCfg();
+      if (!ok) {
+        setMsg('loginMsg','Supabase URL/Key belum dikonfigurasi. Isi pada panel Konfigurasi di atas.','warn');
         return;
       }
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      sb = window.supabase.createClient(CFG.url, CFG.key);
     }
 
     // Util
@@ -197,8 +261,9 @@
     // Low-level ping to Auth settings (no table required)
     async function pingAuth() {
       try {
-        const res = await fetch(SUPABASE_URL.replace(/\/$/, '') + '/auth/v1/settings', {
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        if (!CFG.url || !CFG.key) return { ok:false, error: new Error('Config missing') };
+        const res = await fetch(CFG.url.replace(/\/$/, '') + '/auth/v1/settings', {
+          headers: { 'apikey': CFG.key, 'Authorization': 'Bearer ' + CFG.key },
           method: 'GET', mode: 'cors'
         });
         if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
@@ -336,6 +401,10 @@
       el('btnCancel').addEventListener('click', clearForm);
       el('btnRefresh').addEventListener('click', ()=> loadData(el('search').value.trim()));
       el('search').addEventListener('input', (e)=> loadData(e.target.value.trim()));
+      const sc = document.getElementById('btnSaveCfg');
+      const cc = document.getElementById('btnClearCfg');
+      if (sc) sc.addEventListener('click', saveCfg);
+      if (cc) cc.addEventListener('click', clearCfg);
     });
   </script>
 </body>
