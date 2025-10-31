@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug - Supabase Config</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .ok { color: green; } .error { color: red; } .warn { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Supabase Config Debug</h1>
+    
+    <div class="section">
+        <h3>1. Config.js Loading Test</h3>
+        <div id="configStatus">Loading...</div>
+    </div>
+    
+    <div class="section">
+        <h3>2. Environment Info</h3>
+        <div id="envInfo"></div>
+    </div>
+    
+    <div class="section">
+        <h3>3. Raw Config Values</h3>
+        <div id="rawConfig"></div>
+    </div>
+    
+    <div class="section">
+        <h3>4. Troubleshooting Steps</h3>
+        <ol>
+            <li>Pastikan GitHub Secrets sudah diset: <code>SUPABASE_URL</code> dan <code>SUPABASE_ANON_KEY</code></li>
+            <li>Pastikan GitHub Pages source = <strong>GitHub Actions</strong> (bukan Deploy from branch)</li>
+            <li>Cek GitHub Actions tab untuk melihat apakah workflow berhasil</li>
+            <li>Tunggu 1-2 menit setelah push untuk deploy selesai</li>
+        </ol>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script>
+        document.getElementById('envInfo').innerHTML = `
+            <strong>Hostname:</strong> ${window.location.hostname}<br>
+            <strong>URL:</strong> ${window.location.href}<br>
+            <strong>User Agent:</strong> ${navigator.userAgent}
+        `;
+        
+        // Check config
+        setTimeout(() => {
+            const status = document.getElementById('configStatus');
+            const raw = document.getElementById('rawConfig');
+            
+            if (typeof window.SUPABASE_CONFIG === 'undefined') {
+                status.innerHTML = '<span class="error">❌ Config not loaded - assets/js/config.js failed to load</span>';
+                raw.innerHTML = '<span class="error">SUPABASE_CONFIG is undefined</span>';
+            } else {
+                const config = window.SUPABASE_CONFIG;
+                const isTemplate = config.url === 'YOUR_SUPABASE_URL_HERE' || config.anonKey === 'YOUR_SUPABASE_ANON_KEY_HERE';
+                
+                if (isTemplate) {
+                    status.innerHTML = '<span class="warn">⚠️ Using template config - GitHub Actions injection failed</span>';
+                } else {
+                    status.innerHTML = '<span class="ok">✅ Real config loaded from GitHub Actions</span>';
+                }
+                
+                raw.innerHTML = `
+                    <strong>URL:</strong> ${config.url}<br>
+                    <strong>Key:</strong> ${config.anonKey ? config.anonKey.substring(0, 20) + '...' : 'undefined'}<br>
+                    <strong>Is Template:</strong> ${isTemplate ? 'Yes (❌)' : 'No (✅)'}
+                `;
+            }
+        }, 100);
+    </script>
+</body>
+</html>
