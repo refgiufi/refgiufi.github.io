@@ -1,0 +1,14 @@
+// Development Configuration Sample
+// Copy this file to dev-config.js and fill with your actual Supabase credentials
+// dev-config.js is gitignored for security
+
+window.DEV_CONFIG = {
+  SUPABASE_URL: 'https://your-project-id.supabase.co',
+  SUPABASE_ANON_KEY: 'your-anon-key-here'
+};
+
+// Instructions:
+// 1. Copy this file: cp dev-config.js.sample dev-config.js
+// 2. Edit dev-config.js with your real Supabase URL and anon key
+// 3. Start server: python -m http.server 8000
+// 4. Access admin: http://localhost:8000/admin/dashboard.html

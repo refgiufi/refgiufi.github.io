@@ -3,6 +3,7 @@ node_modules/
 
 # Development config (keep credentials safe)
 dev-config.js
+# Note: dev-config.js.sample is tracked as template
 
 # Logs
 *.log

@@ -23,7 +23,28 @@ Repository ini juga dilengkapi dengan **Supabase CMS** yang menggunakan GitHub A
 
 ### 🚀 Cara Setup CMS
 
-#### 1. Setup GitHub Secrets
+#### 1. Development Setup (Local)
+
+```bash
+# Clone repository
+git clone https://github.com/refgiufi/refgiufi.github.io.git
+cd refgiufi.github.io
+
+# Copy template config
+cp dev-config.js.sample dev-config.js
+
+# Edit dev-config.js dengan credentials Supabase asli
+# SUPABASE_URL: https://your-project.supabase.co
+# SUPABASE_ANON_KEY: your-real-anon-key
+
+# Start local server
+python -m http.server 8000
+
+# Access admin dashboard
+# http://localhost:8000/admin/dashboard.html
+```
+
+#### 2. Production Setup (GitHub Pages)
 
 1. Buka repository di GitHub
 2. Pergi ke **Settings** → **Secrets and variables** → **Actions**
@@ -31,10 +52,10 @@ Repository ini juga dilengkapi dengan **Supabase CMS** yang menggunakan GitHub A
    - **SUPABASE_URL:** `https://your-project-id.supabase.co`
    - **SUPABASE_ANON_KEY:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 
-#### 2. Enable GitHub Pages
+#### 3. Enable GitHub Pages
 - **Settings** → **Pages** → Source: **GitHub Actions**
 
-#### 3. Setup Database Schema
+#### 4. Setup Database Schema
 
 Buka Supabase Dashboard → SQL Editor dan jalankan:
 
