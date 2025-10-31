@@ -376,35 +376,37 @@
     <!-- Supabase Configuration (injected by GitHub Actions) -->
     <script src="../assets/js/config.js"></script>
     
+    <!-- Enhanced Configuration Loader -->
+    <script src="../assets/js/config-loader.js"></script>
+    
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         let supabase = null;
+        let configLoader = null;
         const TABLE_NAME = 'users'; // Nama tabel yang akan digunakan
 
-        // Initialize Supabase client
-        function initSupabase() {
-            // Priority: localStorage -> config.js (GitHub Actions) -> null
-            let url = localStorage.getItem('supabaseUrl');
-            let key = localStorage.getItem('supabaseKey');
-            
-            // Fallback to config.js (injected by GitHub Actions) if localStorage empty
-            if (!url || !key) {
-                const config = window.SUPABASE_CONFIG;
-                if (config && config.url && config.anonKey && 
-                    config.url.startsWith('http') && config.anonKey.length > 20) {
-                    url = config.url;
-                    key = config.anonKey;
-                }
+        // Initialize Supabase client with enhanced config
+        async function initSupabase() {
+            if (!configLoader) {
+                configLoader = new ConfigLoader();
+                await configLoader.loadConfig();
             }
             
-            if (url && key && url.startsWith('http') && key.length > 20) {
-                supabase = window.supabase.createClient(url, key);
-                document.getElementById('supabaseUrl').value = url;
-                document.getElementById('supabaseKey').value = key;
-                updateStatus(true, 'Connected to Supabase');
-                return true;
+            const config = configLoader.getConfig();
+            
+            if (config.isValid) {
+                try {
+                    supabase = configLoader.createSupabaseClient();
+                    document.getElementById('supabaseUrl').value = config.url;
+                    document.getElementById('supabaseKey').value = config.anonKey;
+                    updateStatus(true, 'Connected to Supabase');
+                    return true;
+                } catch (error) {
+                    updateStatus(false, 'Error creating client: ' + error.message);
+                    return false;
+                }
             } else {
                 updateStatus(false, 'Configuration needed');
                 return false;
@@ -757,8 +759,8 @@
         }
 
         // Initialize on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            initSupabase();
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initSupabase();
         });
     </script>
 </body>

@@ -170,41 +170,38 @@
   <!-- Supabase Configuration (injected by GitHub Actions) -->
   <script src="../assets/js/config.js"></script>
   
+  <!-- Enhanced Configuration Loader -->
+  <script src="../assets/js/config-loader.js"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 2) KONFIGURASI DASAR
+    // Enhanced Configuration System
     const TABLE = 'users';
     let sb = null;     // supabase client
     let me = null;     // user object
     let isAdmin = false;
+    let configLoader = null;
     let CFG = { url: null, key: null };
 
-    function loadCfg() {
-      // Prioritas: localStorage -> config.js (GitHub Actions) -> null
-      let url = localStorage.getItem('sb_url');
-      let key = localStorage.getItem('sb_key');
-      
-      // Fallback to config.js (injected by GitHub Actions) if localStorage empty
-      if (!url || !key) {
-        const config = window.SUPABASE_CONFIG;
-        if (config && config.url && config.anonKey && 
-            config.url.startsWith('http') && config.anonKey.length > 20) {
-          url = config.url;
-          key = config.anonKey;
-        }
+    async function loadCfg() {
+      // Initialize enhanced config loader
+      if (!configLoader) {
+        configLoader = new ConfigLoader();
+        await configLoader.loadConfig();
       }
       
-      CFG.url = (url && /^https:\/\/.*supabase\.co\/?$/.test(url)) ? url : null;
-      CFG.key = (key && key.length > 20) ? key : null;
+      const config = configLoader.getConfig();
+      CFG.url = config.url;
+      CFG.key = config.anonKey;
       
       const urlEl = document.getElementById('cfgUrl');
       const keyEl = document.getElementById('cfgKey');
       if (urlEl) urlEl.value = CFG.url || '';
       if (keyEl) keyEl.value = CFG.key || '';
-      return !!(CFG.url && CFG.key);
+      return config.isValid;
     }
 
-    function saveCfg() {
+    async function saveCfg() {
       const u = document.getElementById('cfgUrl').value.trim();
       const k = document.getElementById('cfgKey').value.trim();
       if (!/^https:\/\/.*supabase\.co\/?$/.test(u) || k.length < 20) {
@@ -215,7 +212,7 @@
       localStorage.setItem('sb_key', k);
       CFG.url = u; CFG.key = k;
       setMsg('cfgMsg','Konfigurasi tersimpan ✓','ok');
-      init();
+      await init();
       return true;
     }
 
@@ -228,13 +225,18 @@
     }
 
     // Inisialisasi client
-    function init() {
-      const ok = loadCfg();
+    async function init() {
+      const ok = await loadCfg();
       if (!ok) {
         setMsg('loginMsg','Supabase URL/Key belum dikonfigurasi. Isi pada panel Konfigurasi di atas.','warn');
         return;
       }
-      sb = window.supabase.createClient(CFG.url, CFG.key);
+      
+      try {
+        sb = configLoader.createSupabaseClient();
+      } catch (error) {
+        setMsg('loginMsg','Error creating Supabase client: ' + error.message,'err');
+      }
     }
 
     // Util
@@ -398,8 +400,8 @@
     function escapeHtml(s){ return String(s).replace(/[&<>"]'/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
 
     // Events
-    window.addEventListener('DOMContentLoaded',()=>{
-      init();
+    window.addEventListener('DOMContentLoaded', async ()=>{
+      await init();
       el('btnLogin').addEventListener('click', login);
       el('btnLogout').addEventListener('click', logout);
       el('btnTest').addEventListener('click', testConn);
@@ -409,7 +411,7 @@
       el('search').addEventListener('input', (e)=> loadData(e.target.value.trim()));
       const sc = document.getElementById('btnSaveCfg');
       const cc = document.getElementById('btnClearCfg');
-      if (sc) sc.addEventListener('click', saveCfg);
+      if (sc) sc.addEventListener('click', () => saveCfg());
       if (cc) cc.addEventListener('click', clearCfg);
     });
   </script>

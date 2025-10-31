@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Environment files (keep credentials safe)
+.env
+.env.local
+.env.production
+.env.development
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build outputs
+dist/
+build/
