@@ -311,12 +311,10 @@
             <div class="alert alert-info show">
                 <strong>Setup Instructions:</strong>
                 <ol style="margin-top: 10px; margin-left: 20px;">
-                    <li>Buka <a href="https://supabase.com" target="_blank">supabase.com</a> dan buat akun gratis</li>
-                    <li>Klik "New Project" dan isi detail project Anda</li>
-                    <li>Tunggu hingga database siap (sekitar 2 menit)</li>
-                    <li>Masuk ke Settings → API untuk mendapatkan URL dan anon key</li>
-                    <li>Copy-paste URL dan Key ke form di bawah</li>
-                    <li>Klik "Save Configuration"</li>
+                    <li>Masukkan URL dan Anon Key Supabase di form bawah</li>
+                    <li>Klik "Save Configuration" → data tersimpan di localStorage browser</li>
+                    <li>Klik "Test Connection" untuk verifikasi</li>
+                    <li>Jika tabel belum ada, klik "Create Sample Table" dan jalankan SQL di Supabase</li>
                 </ol>
             </div>
             <div class="grid-2">
@@ -331,6 +329,9 @@
             </div>
             <button class="btn btn-success" onclick="saveConfig()">💾 Save Configuration</button>
             <button class="btn btn-warning" onclick="createTable()">🗂️ Create Sample Table</button>
+            <div style="margin-top:12px">
+                <small class="muted">💡 <strong>Keamanan:</strong> URL/Key disimpan di localStorage browser (tidak di repo). Untuk production, gunakan backend/environment variables.</small>
+            </div>
         </div>
 
         <!-- Create/Update Form -->
@@ -372,6 +373,9 @@
         </div>
     </div>
 
+    <!-- Supabase Configuration (injected by GitHub Actions) -->
+    <script src="../assets/js/config.js"></script>
+    
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -381,10 +385,21 @@
 
         // Initialize Supabase client
         function initSupabase() {
-            const url = localStorage.getItem('supabaseUrl');
-            const key = localStorage.getItem('supabaseKey');
+            // Priority: localStorage -> config.js (GitHub Actions) -> null
+            let url = localStorage.getItem('supabaseUrl');
+            let key = localStorage.getItem('supabaseKey');
             
-            if (url && key) {
+            // Fallback to config.js (injected by GitHub Actions) if localStorage empty
+            if (!url || !key) {
+                const config = window.SUPABASE_CONFIG;
+                if (config && config.url && config.anonKey && 
+                    config.url.startsWith('http') && config.anonKey.length > 20) {
+                    url = config.url;
+                    key = config.anonKey;
+                }
+            }
+            
+            if (url && key && url.startsWith('http') && key.length > 20) {
                 supabase = window.supabase.createClient(url, key);
                 document.getElementById('supabaseUrl').value = url;
                 document.getElementById('supabaseKey').value = key;

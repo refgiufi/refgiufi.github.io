@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase CRUD - Secure with Auth</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .login-container {
+            max-width: 450px;
+            margin: 100px auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .data-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .user-info {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .config-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .config-note strong {
+            color: #856404;
+        }
+
+        .config-note code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <div class="card">
+                <h1 style="color: #667eea; font-size: 2em; text-align: center; margin-bottom: 10px;">🔐 Secure CRUD</h1>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">Login with Supabase Authentication</p>
+                
+                <div id="alertContainer"></div>
+
+                <!-- Config Instructions -->
+                <div class="alert alert-info show">
+                    <strong>📝 Setup First:</strong>
+                    <ol style="margin-top: 10px; margin-left: 20px; font-size: 13px;">
+                        <li>Buka file ini dengan text editor</li>
+                        <li>Cari baris <code>const SUPABASE_URL</code> dan <code>const SUPABASE_KEY</code></li>
+                        <li>Isi dengan credentials Supabase Anda</li>
+                        <li>Save dan refresh halaman</li>
+                    </ol>
+                </div>
+
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+                    <button class="tab-btn" onclick="switchTab('register')">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="loginForm">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••">
+                    </div>
+                    <button class="btn btn-primary" onclick="handleLogin()">
+                        🔑 Login
+                    </button>
+                </div>
+
+                <!-- Register Form -->
+                <div id="registerForm" class="hidden">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="registerEmail" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="registerPassword" placeholder="Min. 6 characters">
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="registerName" placeholder="Your name">
+                    </div>
+                    <button class="btn btn-success" onclick="handleRegister()">
+                        ✨ Create Account
+                    </button>
+                </div>
+
+                <div class="config-note">
+                    <strong>⚠️ Keamanan:</strong><br>
+                    Credentials disimpan di source code (lines 300-301). Untuk production, gunakan environment variables atau backend proxy.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (after login) -->
+    <div id="mainApp" class="hidden">
+        <div class="container">
+            <h1>🔒 Secure CRUD Application</h1>
+
+            <div class="card">
+                <div class="user-info">
+                    <div>
+                        <strong>Logged in as:</strong> <span id="userEmail"></span>
+                    </div>
+                    <button class="btn btn-danger btn-small" onclick="handleLogout()">
+                        🚪 Logout
+                    </button>
+                </div>
+            </div>
+
+            <div id="alertContainerMain"></div>
+
+            <!-- Create/Update Form -->
+            <div class="card">
+                <h2>➕ Create / Update Data</h2>
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="name">Name *</label>
+                    <input type="text" id="name" placeholder="Enter name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" placeholder="Enter email" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" placeholder="Enter description"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="createData()" id="submitBtn">
+                    ✨ Create Data
+                </button>
+                <button class="btn btn-warning btn-small" onclick="cancelEdit()" id="cancelBtn" style="display: none;">
+                    ❌ Cancel
+                </button>
+            </div>
+
+            <!-- Data List -->
+            <div class="card">
+                <h2>📋 Your Data</h2>
+                <button class="btn btn-primary btn-small" onclick="readData()">🔄 Refresh</button>
+                <div id="dataContainer">
+                    <div class="empty-state">
+                        <p>Loading data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // ⚠️ GANTI INI DENGAN CREDENTIALS SUPABASE ANDA
+        // Cara dapat: Supabase Dashboard → Settings → API
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';  // ← EDIT INI
+        const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // ← EDIT INI
+        
+        let supabase = null;
+        let currentUser = null;
+        const TABLE_NAME = 'users';
+
+        // Initialize Supabase
+        function initSupabase() {
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE' || SUPABASE_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') {
+                showAlert('⚠️ Please configure SUPABASE_URL and SUPABASE_KEY in the source code first!', 'error', 'alertContainer');
+                return false;
+            }
+            
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            checkUser();
+            return true;
+        }
+
+        // Check if user is logged in
+        async function checkUser() {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                currentUser = user;
+                showMainApp();
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        // Switch between login and register tabs
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabs[0].classList.add('active');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabs[1].classList.add('active');
+            }
+        }
+
+        // Handle Login
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showAlert('Please fill in all fields', 'error', 'alertContainer');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                currentUser = data.user;
+                showAlert('Login successful!', 'success', 'alertContainer');
+                
+                setTimeout(() => {
+                    showMainApp();
+                }, 1000);
+            } catch (error) {
+                showAlert('Login failed: ' + error.message, 'error', 'alertContainer');
+            }
+        }
+
+        // Handle Register
+        async function handleRegister() {
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const name = document.getElementById('registerName').value.trim();
+
+            if (!email || !password || !name) {
+                showAlert('Please fill in all fields', 'error', 'alertContainer');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('Password must be at least 6 characters', 'error', 'alertContainer');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                showAlert('Account created! Check your email to confirm.', 'success', 'alertContainer');
+                
+                // Switch to login tab
+                setTimeout(() => {
+                    switchTab('login');
+                    document.getElementById('loginEmail').value = email;
+                }, 2000);
+            } catch (error) {
+                showAlert('Registration failed: ' + error.message, 'error', 'alertContainer');
+            }
+        }
+
+        // Handle Logout
+        async function handleLogout() {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                showAlert('Logout failed: ' + error.message, 'error', 'alertContainerMain');
+            } else {
+                currentUser = null;
+                showLoginScreen();
+            }
+        }
+
+        // Show login screen
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        // Show main app
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = currentUser.email;
+            readData();
+        }
+
+        // CREATE - Insert new data
+        async function createData() {
+            const editId = document.getElementById('editId').value;
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            if (!name || !email) {
+                showAlert('Name and Email are required', 'error', 'alertContainerMain');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+
+            try {
+                if (editId) {
+                    // UPDATE
+                    const { data, error } = await supabase
+                        .from(TABLE_NAME)
+                        .update({ name, email, description })
+                        .eq('id', editId)
+                        .select();
+
+                    if (error) throw error;
+                    showAlert('Data updated successfully!', 'success', 'alertContainerMain');
+                } else {
+                    // INSERT
+                    const { data, error } = await supabase
+                        .from(TABLE_NAME)
+                        .insert([{ 
+                            name, 
+                            email, 
+                            description,
+                            user_id: currentUser.id  // Link to authenticated user
+                        }])
+                        .select();
+
+                    if (error) throw error;
+                    showAlert('Data created successfully!', 'success', 'alertContainerMain');
+                }
+
+                // Clear form
+                document.getElementById('name').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('description').value = '';
+                document.getElementById('editId').value = '';
+                document.getElementById('submitBtn').innerHTML = '✨ Create Data';
+                document.getElementById('cancelBtn').style.display = 'none';
+
+                readData();
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error', 'alertContainerMain');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        // READ - Get all data
+        async function readData() {
+            const container = document.getElementById('dataContainer');
+            container.innerHTML = '<div class="empty-state"><span class="loading"></span><p>Loading...</p></div>';
+
+            try {
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .eq('user_id', currentUser.id)  // Only show user's own data
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (data.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No data found. Create your first entry!</p></div>';
+                    return;
+                }
+
+                let tableHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                data.forEach(item => {
+                    const date = new Date(item.created_at).toLocaleDateString();
+                    tableHTML += `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.email}</td>
+                            <td>${item.description || '-'}</td>
+                            <td>${date}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-warning btn-small" onclick="editData(${item.id})">✏️ Edit</button>
+                                    <button class="btn btn-danger btn-small" onclick="deleteData(${item.id})">🗑️ Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += '</tbody></table>';
+                container.innerHTML = tableHTML;
+            } catch (error) {
+                container.innerHTML = `<div class="empty-state"><p style="color: #ef4444;">Error: ${error.message}</p></div>`;
+            }
+        }
+
+        // UPDATE - Edit data
+        async function editData(id) {
+            try {
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('editId').value = data.id;
+                document.getElementById('name').value = data.name;
+                document.getElementById('email').value = data.email;
+                document.getElementById('description').value = data.description || '';
+                document.getElementById('submitBtn').innerHTML = '💾 Update Data';
+                document.getElementById('cancelBtn').style.display = 'inline-block';
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error', 'alertContainerMain');
+            }
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            document.getElementById('editId').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('submitBtn').innerHTML = '✨ Create Data';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        // DELETE - Remove data
+        async function deleteData(id) {
+            if (!confirm('Delete this data?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from(TABLE_NAME)
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showAlert('Deleted successfully!', 'success', 'alertContainerMain');
+                readData();
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error', 'alertContainerMain');
+            }
+        }
+
+        // Show alert
+        function showAlert(message, type, containerId) {
+            const container = document.getElementById(containerId);
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} show`;
+            alertDiv.innerHTML = message;
+            
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 300);
+            }, 5000);
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
+        });
+    </script>
+</body>
+</html>

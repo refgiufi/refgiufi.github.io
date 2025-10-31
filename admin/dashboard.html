@@ -167,12 +167,11 @@
     </div>
   </div>
 
+  <!-- Supabase Configuration (injected by GitHub Actions) -->
+  <script src="../assets/js/config.js"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 1) ISI KREDENSIAL ANDA DI SINI (untuk demo; untuk produksi gunakan backend/env)
-    const SUPABASE_URL = 'https://cbrxnzhifcuyebcsyinj.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNicnhuemhpZmN1eWViY3N5aW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5MjgwNjMsImV4cCI6MjA3NzUwNDA2M30.GILRrDRz19leEsIvVmbDgbM1vKq7ulL2LCrVzBtthmk';
-
     // 2) KONFIGURASI DASAR
     const TABLE = 'users';
     let sb = null;     // supabase client
@@ -181,16 +180,23 @@
     let CFG = { url: null, key: null };
 
     function loadCfg() {
-      // Prioritas: konstanta valid -> localStorage -> null
-      const constValid = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
-      if (constValid) {
-        CFG.url = SUPABASE_URL; CFG.key = SUPABASE_ANON_KEY;
-      } else {
-        const u = localStorage.getItem('sb_url');
-        const k = localStorage.getItem('sb_key');
-        CFG.url = (u && /^https:\/\/.*supabase\.co\/?$/.test(u)) ? u : null;
-        CFG.key = (k && k.length > 20) ? k : null;
+      // Prioritas: localStorage -> config.js (GitHub Actions) -> null
+      let url = localStorage.getItem('sb_url');
+      let key = localStorage.getItem('sb_key');
+      
+      // Fallback to config.js (injected by GitHub Actions) if localStorage empty
+      if (!url || !key) {
+        const config = window.SUPABASE_CONFIG;
+        if (config && config.url && config.anonKey && 
+            config.url.startsWith('http') && config.anonKey.length > 20) {
+          url = config.url;
+          key = config.anonKey;
+        }
       }
+      
+      CFG.url = (url && /^https:\/\/.*supabase\.co\/?$/.test(url)) ? url : null;
+      CFG.key = (key && key.length > 20) ? key : null;
+      
       const urlEl = document.getElementById('cfgUrl');
       const keyEl = document.getElementById('cfgKey');
       if (urlEl) urlEl.value = CFG.url || '';
