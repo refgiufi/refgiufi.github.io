@@ -149,8 +149,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // 1) ISI KREDENSIAL ANDA DI SINI (untuk demo; untuk produksi gunakan backend/env)
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+    const SUPABASE_URL = 'https://cbrxnzhifcuyebcsyinj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNicnhuemhpZmN1eWViY3N5aW5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5MjgwNjMsImV4cCI6MjA3NzUwNDA2M30.GILRrDRz19leEsIvVmbDgbM1vKq7ulL2LCrVzBtthmk';
 
     // 2) KONFIGURASI DASAR
     const TABLE = 'users';
@@ -194,13 +194,42 @@
       el('loginPanel').classList.remove('hidden');
     }
 
-    async function testConn(){
+    // Low-level ping to Auth settings (no table required)
+    async function pingAuth() {
       try {
-        const { error } = await sb.from(TABLE).select('count', { count:'exact', head:true });
+        const res = await fetch(SUPABASE_URL.replace(/\/$/, '') + '/auth/v1/settings', {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+          method: 'GET', mode: 'cors'
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e };
+      }
+    }
+
+    function hint(msg){
+      if (/relation .* does not exist|42P01/i.test(msg)) return 'Tabel "users" belum ada. Jalankan SQL pembuatan tabel di Supabase.';
+      if (/permission denied|RLS|policy|PGRST|401|403/i.test(msg)) return 'RLS/Policy menolak akses. Pastikan policy admin/owner sudah dibuat.';
+      if (/Failed to fetch|NetworkError|TypeError: Failed to fetch/i.test(msg)) return 'Kemungkinan Network/CORS/AdBlock. Pastikan URL benar & tanpa spasi, coba nonaktifkan VPN/AdBlock.';
+      return '';
+    }
+
+    async function testConn(){
+      // Step 1: ping Auth
+      const ping = await pingAuth();
+      if (!ping.ok) {
+        const msg = 'Ping Auth gagal: ' + (ping.error?.message || ping.error);
+        return setMsg('loginMsg', msg + (hint(msg) ? ' — ' + hint(msg) : ''), 'err');
+      }
+      // Step 2: query lightweight to users
+      try {
+        const { error } = await sb.from(TABLE).select('*', { count:'exact', head:true }).limit(1);
         if (error) throw error;
         setMsg('loginMsg','Koneksi OK ✓','ok');
       } catch (e) {
-        setMsg('loginMsg','Koneksi gagal: '+e.message,'err');
+        const msg = 'Koneksi gagal: ' + e.message;
+        setMsg('loginMsg', msg + (hint(e.message) ? ' — ' + hint(e.message) : ''), 'err');
       }
     }
 

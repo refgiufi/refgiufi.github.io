@@ -415,25 +415,69 @@
             }
         }
 
-        // Test connection
+        // Low-level ping to Supabase Auth settings (doesn't require tables/policies)
+        async function pingSupabaseRaw(url, key) {
+            try {
+                const res = await fetch(url.replace(/\/$/, '') + '/auth/v1/settings', {
+                    headers: { 'apikey': key, 'Authorization': 'Bearer ' + key },
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+                return { ok: true };
+            } catch (e) {
+                return { ok: false, error: e };
+            }
+        }
+
+        function explainError(errorMsg) {
+            if (/relation .* does not exist|42P01/i.test(errorMsg)) {
+                return 'Table "users" belum ada. Klik tombol "Create Sample Table" lalu jalankan SQL di Supabase → SQL Editor.';
+            }
+            if (/permission denied|RLS|policy|PGRST|401|403/i.test(errorMsg)) {
+                return 'RLS/Policy menolak akses. Pastikan policy testing sudah dibuat (Allow all) atau ikuti policy aman di panduan.';
+            }
+            if (/Failed to fetch|NetworkError|TypeError: Failed to fetch/i.test(errorMsg)) {
+                return 'Network/CORS error. Coba nonaktifkan VPN/AdBlock, pastikan URL mulai dengan https:// dan tidak ada spasi.';
+            }
+            return null;
+        }
+
+        // Test connection with diagnostics
         async function testConnection() {
             if (!supabase) {
                 showAlert('Please configure Supabase first', 'error');
                 return;
             }
-            
+
+            const url = localStorage.getItem('supabaseUrl');
+            const key = localStorage.getItem('supabaseKey');
+
+            // Step 1: ping Auth settings
+            const ping = await pingSupabaseRaw(url, key);
+            if (!ping.ok) {
+                updateStatus(false, 'Connection failed');
+                const msg = 'Auth ping error: ' + (ping.error?.message || ping.error);
+                const hint = explainError(msg);
+                showAlert(msg + (hint ? '<br><br>Hint: ' + hint : ''), 'error');
+                return;
+            }
+
+            // Step 2: simple table head query
             try {
-                const { data, error } = await supabase
+                const { error } = await supabase
                     .from(TABLE_NAME)
-                    .select('count', { count: 'exact', head: true });
-                
+                    .select('*', { count: 'exact', head: true })
+                    .limit(1);
+
                 if (error) throw error;
-                
+
                 updateStatus(true, 'Connected to Supabase ✓');
                 showAlert('Connection successful!', 'success');
             } catch (error) {
                 updateStatus(false, 'Connection failed');
-                showAlert('Connection error: ' + error.message, 'error');
+                const hint = explainError(error.message || String(error));
+                showAlert('Connection error: ' + error.message + (hint ? '<br><br>Hint: ' + hint : ''), 'error');
             }
         }
 
