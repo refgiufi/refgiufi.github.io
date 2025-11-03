@@ -118,13 +118,24 @@ SELECT id, 'admin', 'admin' FROM auth.users WHERE email = 'admin@example.com';
 - **Admin Dashboard:** `https://refgiufi.github.io/admin/dashboard.html`
 - **Testing Interface:** `https://refgiufi.github.io/admin/testing.html`
 
+### 🎨 Customization
+
+#### Profile Image
+Replace the hero and about section images with your own photo:
+1. Save your profile photo as `assets/images/profile.png`
+2. Recommended size: 700x900 pixels for optimal quality
+3. Format: PNG or JPG (rename to profile.png)
+4. Ensure the image is professional and well-lit
+
+The image will automatically appear in:
+- Hero section (main profile display)
+- About section (profile showcase)
+
 ---
 
 ## 🎨 Design Reference
 
 ![Portfolio Design Reference](assets/design-reference.png)
-
-> **Note:** Simpan gambar referensi desain ke folder `assets/design-reference.png` untuk menampilkan preview desain.
 
 The website design is based on a modern portfolio template featuring:
 - Clean and minimal aesthetic
@@ -170,7 +181,7 @@ This project is open source and available under the MIT License.
 
 **refgiufi**
 - Instagram: [@refgiufi](https://www.instagram.com/refgiufi)
-- Email: hello@dnhova.com
+- Email: refgiufi.patria@gmail.com
 
 ---
 
