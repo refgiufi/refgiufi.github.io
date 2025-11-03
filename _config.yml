@@ -1,0 +1,23 @@
+# GitHub Pages Jekyll Configuration
+permalink: pretty
+plugins:
+  - jekyll-relative-links
+
+# Enable relative links processing
+relative_links:
+  enabled: true
+  collections: true
+
+# Markdown settings
+markdown: kramdown
+highlighter: rouge
+
+# Site settings
+title: "Refgiufi - Portfolio"
+description: "Software Developer, Data Analyst & Lecturer"
+url: "https://refgiufi.github.io"
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - assets/README.md

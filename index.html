@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Portfolio Website</title>
+    <title>Refgiufi - Software Developer, Data Analyst & Lecturer</title>
     <style>
         * {
             margin: 0;
@@ -40,15 +40,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 25px 40px;
+            padding: 20px 30px;
         }
 
         .logo {
-            font-size: 20px;
+            font-size: clamp(16px, 2.5vw, 20px);
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             transition: transform 0.3s;
         }
 
@@ -57,8 +57,8 @@
         }
 
         .logo-icon {
-            width: 35px;
-            height: 35px;
+            width: clamp(28px, 4vw, 35px);
+            height: clamp(28px, 4vw, 35px);
             background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
             border-radius: 8px;
             display: flex;
@@ -66,19 +66,19 @@
             justify-content: center;
             color: #fff;
             font-weight: 700;
-            font-size: 18px;
+            font-size: clamp(14px, 2.5vw, 18px);
         }
 
         .nav-links {
             display: flex;
             list-style: none;
-            gap: 45px;
+            gap: clamp(20px, 4vw, 45px);
         }
 
         .nav-links a {
             text-decoration: none;
             color: #1a1a1a;
-            font-size: 14px;
+            font-size: clamp(12px, 1.8vw, 14px);
             font-weight: 500;
             transition: all 0.3s;
             position: relative;
@@ -130,9 +130,9 @@
         .contact-btn {
             background: #1a1a1a;
             color: #fff;
-            padding: 10px 25px;
+            padding: clamp(8px, 1.5vw, 10px) clamp(16px, 3vw, 25px);
             border-radius: 25px;
-            font-size: 13px;
+            font-size: clamp(11px, 1.8vw, 13px);
             font-weight: 500;
             transition: all 0.3s;
             border: 2px solid #1a1a1a;
@@ -148,31 +148,90 @@
         /* Hero Section */
         .hero {
             margin-top: 80px;
-            padding: 60px 40px 80px;
-            background: #fff;
+            padding: 40px 20px 0px;
+            background: #e8e8e8;
             position: relative;
+            min-height: 80vh;
+            overflow: hidden;
         }
 
         .hero-container {
             max-width: 1400px;
             margin: 0 auto;
+            height: 100%;
         }
 
         .hero-content-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
+            gap: 40px;
+            align-items: stretch;
+            height: 100%;
+            min-height: 60vh;
         }
 
+        /* Add some text effects */
         .hero-left {
-            padding-right: 40px;
+            padding-right: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-left::before {
+            content: '';
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: linear-gradient(180deg, #1a1a1a 0%, transparent 100%);
+            border-radius: 2px;
+            animation: slideInLeft 1.5s ease-out 0.7s both;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                height: 0;
+                opacity: 0;
+            }
+            to {
+                height: 60%;
+                opacity: 1;
+            }
+        }
+
+        /* Enhanced text styling */
+        .hero-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: clamp(14px, 2vw, 15px);
+            line-height: 1.8;
+            max-width: 90%;
+            position: relative;
+            animation: fadeInUp 1.2s ease-out 0.3s both;
+            font-weight: 400;
+            padding-left: 25px;
+        }
+
+        .hero-subtitle::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 12px;
+            height: 2px;
+            background: #ccc;
+            border-radius: 1px;
         }
 
         .hero-stats {
             display: flex;
-            gap: 60px;
-            margin-bottom: 60px;
+            gap: 30px;
+            margin-bottom: 40px;
+            animation: fadeInUp 1.2s ease-out 0.4s both;
         }
 
         .stat {
@@ -180,31 +239,82 @@
         }
 
         .stat-number {
-            font-size: 32px;
-            font-weight: 300;
+            font-size: clamp(24px, 4vw, 32px);
+            font-weight: 700;
             margin-bottom: 8px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            animation: countUp 2s ease-out 0.8s both;
         }
 
         .stat-label {
-            font-size: 11px;
+            font-size: clamp(10px, 1.2vw, 11px);
             color: #999;
             letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 500;
+            animation: fadeInUp 1.2s ease-out 0.6s both;
         }
 
         .hero h1 {
-            font-size: 120px;
+            font-size: clamp(60px, 12vw, 120px);
             font-weight: 300;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             line-height: 1;
-            letter-spacing: -3px;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 50%, #1a1a1a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            text-shadow: 0 0 30px rgba(0,0,0,0.1);
+            animation: fadeInUp 1.2s ease-out;
+        }
+
+        .hero h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #1a1a1a 0%, transparent 100%);
+            animation: slideIn 1.5s ease-out 0.5s both;
+        }
+
+        .hero-intro {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 400;
+            color: #666;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+            animation: fadeInUp 1.2s ease-out 0.2s both;
+            font-style: italic;
         }
 
         .hero-subtitle {
             color: #666;
-            margin-bottom: 40px;
-            font-size: 15px;
+            margin-bottom: 30px;
+            font-size: clamp(14px, 2vw, 15px);
             line-height: 1.8;
-            max-width: 450px;
+            max-width: 90%;
+            position: relative;
+            animation: fadeInUp 1.2s ease-out 0.3s both;
+            font-weight: 400;
+        }
+
+        .hero-subtitle::before {
+            content: '"';
+            font-size: 2em;
+            color: #ccc;
+            position: absolute;
+            left: -20px;
+            top: -10px;
+            font-family: serif;
+            opacity: 0.3;
         }
 
         .cta-button {
@@ -228,15 +338,105 @@
 
         .hero-right {
             position: relative;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            overflow: hidden;
         }
 
         .hero-image {
             width: 100%;
-            height: 650px;
+            height: 100%;
+            min-height: 500px;
             border-radius: 0;
             overflow: hidden;
             filter: grayscale(100%);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center bottom;
+            transition: all 0.8s ease;
+            animation: fadeInRight 1.5s ease-out 0.5s both;
+        }
+
+        .hero-image:hover img {
+            filter: grayscale(0%) brightness(1.05);
+            transform: scale(1.02);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: 60px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Hover effects */
+        .hero-stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            animation: fadeInUp 1.2s ease-out 0.4s both;
+        }
+
+        .stat {
+            text-align: left;
+            padding: 15px 20px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.95);
         }
 
         .hero-image img {
@@ -248,7 +448,7 @@
 
         /* About Section */
         .about {
-            padding: 120px 40px;
+            padding: clamp(40px, 8vw, 80px) clamp(20px, 4vw, 40px);
             background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
             position: relative;
         }
@@ -268,8 +468,8 @@
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 480px 1fr;
-            gap: 120px;
+            grid-template-columns: minmax(300px, 420px) 1fr;
+            gap: clamp(30px, 6vw, 80px);
             align-items: start;
             position: relative;
             z-index: 1;
@@ -281,8 +481,8 @@
         }
 
         .about-left h2 {
-            font-size: 64px;
-            margin-bottom: 35px;
+            font-size: clamp(32px, 6vw, 54px);
+            margin-bottom: 30px;
             font-weight: 300;
             line-height: 1;
             letter-spacing: -2px;
@@ -323,17 +523,17 @@
 
         .about-right {
             display: grid;
-            gap: 70px;
-            padding-top: 20px;
+            gap: 40px;
+            padding-top: 10px;
         }
 
         .about-card {
             display: flex;
-            gap: 35px;
+            gap: 25px;
             align-items: flex-start;
-            padding: 35px;
+            padding: 25px;
             background: #fff;
-            border-radius: 16px;
+            border-radius: 12px;
             transition: all 0.4s ease;
             border: 1px solid rgba(0,0,0,0.05);
             box-shadow: 0 5px 20px rgba(0,0,0,0.02);
@@ -346,8 +546,8 @@
         }
 
         .about-icon {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%);
             border-radius: 50%;
             display: flex;
@@ -389,12 +589,13 @@
             display: flex;
             gap: 35px;
             margin-top: 60px;
-            align-items: flex-start;
+            align-items: stretch;
         }
 
         .profile-image {
-            width: 240px;
-            height: 300px;
+            width: 100%;
+            max-width: 280px;
+            height: 280px;
             border-radius: 16px;
             overflow: hidden;
             flex-shrink: 0;
@@ -434,6 +635,9 @@
 
         .profile-info {
             flex: 1;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
         }
 
         .profile-stat-box {
@@ -444,6 +648,7 @@
             border: 1px solid rgba(0,0,0,0.08);
             box-shadow: 0 10px 30px rgba(0,0,0,0.06);
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         .profile-stat-box:hover {
@@ -526,7 +731,7 @@
 
         /* Experience Section */
         .experience {
-            padding: 100px 40px;
+            padding: clamp(60px, 10vw, 100px) clamp(20px, 4vw, 40px);
             background: #fafafa;
         }
 
@@ -549,7 +754,7 @@
         }
 
         .section-title {
-            font-size: 48px;
+            font-size: clamp(32px, 6vw, 48px);
             font-weight: 400;
         }
 
@@ -679,7 +884,7 @@
 
         /* Latest Works */
         .latest-works {
-            padding: 100px 40px;
+            padding: clamp(60px, 10vw, 100px) clamp(20px, 4vw, 40px);
             background: #fff;
         }
 
@@ -690,8 +895,8 @@
 
         .works-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: clamp(20px, 3vw, 30px);
             margin-top: 60px;
         }
 
@@ -759,7 +964,7 @@
 
         /* Skills Section */
         .skills {
-            padding: 100px 40px;
+            padding: clamp(60px, 10vw, 100px) clamp(20px, 4vw, 40px);
             background: #fff;
         }
 
@@ -770,9 +975,75 @@
 
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: clamp(15px, 2vw, 20px);
             margin-top: 50px;
+        }
+
+        .skill-item {
+            background: #fff;
+            padding: 20px 25px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 400;
+            font-size: 14px;
+            color: #1a1a1a;
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+            cursor: default;
+            position: relative;
+        }
+
+        .skill-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #1a1a1a;
+            transition: width 0.3s ease;
+        }
+
+        .skill-item:hover::after {
+            width: 100%;
+        }
+
+        .skill-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: rgba(0,0,0,0.12);
+        }
+
+        .skill-item:nth-child(1) { animation-delay: 0.1s; }
+        .skill-item:nth-child(2) { animation-delay: 0.15s; }
+        .skill-item:nth-child(3) { animation-delay: 0.2s; }
+        .skill-item:nth-child(4) { animation-delay: 0.25s; }
+        .skill-item:nth-child(5) { animation-delay: 0.3s; }
+        .skill-item:nth-child(6) { animation-delay: 0.35s; }
+        .skill-item:nth-child(7) { animation-delay: 0.4s; }
+        .skill-item:nth-child(8) { animation-delay: 0.45s; }
+        .skill-item:nth-child(9) { animation-delay: 0.5s; }
+        .skill-item:nth-child(10) { animation-delay: 0.55s; }
+        .skill-item:nth-child(11) { animation-delay: 0.6s; }
+        .skill-item:nth-child(12) { animation-delay: 0.65s; }
+
+        @keyframes skillFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Add stagger animation on scroll */
+        .skills-grid .skill-item {
+            opacity: 0;
+            animation: skillFadeIn 0.5s ease-out forwards;
         }
 
         .skill-card {
@@ -866,84 +1137,241 @@
         .footer-contact {
             font-size: 20px;
             font-weight: 400;
+            color: #fff;
         }
 
         /* Responsive */
+        @media (min-width: 1920px) {
+            .hero {
+                min-height: 85vh;
+            }
+            
+            .hero-image {
+                min-height: 700px;
+            }
+        }
+
+        @media (max-width: 1400px) {
+            .hero-container, .about-container, .skills-container, .experience-container, .latest-container {
+                max-width: 95%;
+                padding: 0 20px;
+            }
+            
+            .hero h1 {
+                font-size: clamp(50px, 10vw, 100px);
+            }
+            
+            .about-container {
+                gap: clamp(30px, 8vw, 80px);
+            }
+        }
+
         @media (max-width: 1024px) {
+            .nav-container {
+                padding: 15px 20px;
+            }
+            
+            .hero {
+                padding: 30px 15px 30px;
+                min-height: 70vh;
+            }
+            
+            .hero-content-wrapper {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+                align-items: center;
+            }
+            
+            .hero-left {
+                padding-right: 0;
+                order: 2;
+            }
+            
+            .hero-right {
+                order: 1;
+                justify-content: center;
+                height: 400px;
+            }
+            
+            .hero-image {
+                height: 100%;
+                margin-bottom: 0;
+                border-radius: 15px;
+                max-width: 400px;
+                margin: 0 auto;
+                min-height: 400px;
+            }
+            
+            .hero-stats {
+                justify-content: center;
+                gap: 40px;
+            }
+            
             .about-container {
                 grid-template-columns: 1fr;
-                gap: 60px;
+                gap: 30px;
+            }
+            
+            .about-left {
+                position: relative;
+                top: auto;
+                text-align: center;
+            }
+            
+            .about-profile-wrapper {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .profile-image {
+                width: 220px;
+                height: 220px;
+            }
+
+            .profile-info {
+                min-height: 220px;
             }
 
             .skills-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 15px;
             }
 
-            .about-left {
-                position: relative;
-                top: 0;
-            }
-
-            .about-profile-wrapper {
-                flex-direction: column;
-            }
-
-            .profile-image {
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .hero-content-wrapper {
-                grid-template-columns: 1fr;
-                gap: 50px;
-            }
-
-            .hero-left {
-                padding-right: 0;
-            }
-
-            .hero-image {
-                height: 500px;
+            .skill-item {
+                padding: 20px 15px;
+                font-size: 13px;
             }
         }
 
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 72px;
-            }
-
-            .hero-title-main {
-                font-size: 24px;
-            }
-
-            .hero-stats {
-                gap: 40px;
-            }
-
-            .portfolio-grid,
-            .works-grid,
-            .skills-grid {
-                grid-template-columns: 1fr;
-            }
-
             .nav-links {
                 display: none;
             }
+            
+            .nav-container {
+                padding: 12px 15px;
+            }
+            
+            .hero {
+                margin-top: 60px;
+                padding: 20px 15px 20px;
+            }
+            
+            .hero h1 {
+                font-size: clamp(40px, 12vw, 72px);
+                margin-bottom: 15px;
+            }
+            
+            .hero-stats {
+                gap: 30px;
+                margin-bottom: 30px;
+            }
+            
+            .hero-subtitle {
+                margin-bottom: 25px;
+            }
+            
+            .about {
+                padding: 40px 15px;
+            }
+            
+            .about-profile-wrapper {
+                flex-direction: column;
+                align-items: center;
+                gap: 25px;
+            }
 
+            .profile-image {
+                width: 200px;
+                height: 200px;
+                max-width: none;
+            }
+
+            .profile-info {
+                min-height: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .skills-grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 12px;
+            }
+
+            .skill-item {
+                padding: 18px 12px;
+                font-size: 12px;
+                border-radius: 12px;
+            }
+            
+            .works-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
             .experience-item {
                 grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 40px 0;
+            }
+            
+            .experience-images {
+                order: -1;
             }
 
             .section-title {
-                font-size: 36px;
+                font-size: clamp(28px, 6vw, 36px);
             }
 
             .cta-banner h2 {
-                font-size: 36px;
+                font-size: clamp(28px, 6vw, 36px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+                align-items: center;
+            }
+            
+            .stat {
+                text-align: center;
+            }
+            
+            .about-card {
+                padding: 20px;
+                gap: 15px;
+            }
+            
+            .about-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .skills-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
 
-            .about-container {
-                grid-template-columns: 1fr;
+            .skill-item {
+                padding: 15px 10px;
+                font-size: 11px;
+                border-radius: 10px;
+            }
+
+            .skill-accent {
+                height: 2px;
+            }
+
+            .hero h1 {
+                font-size: clamp(32px, 10vw, 60px);
+            }
+
+            .hero-intro {
+                font-size: clamp(16px, 4vw, 20px);
+                margin-bottom: 20px;
             }
         }
     </style>
@@ -953,12 +1381,13 @@
     <nav>
         <div class="nav-container">
             <div class="logo">
-                <div class="logo-icon">P</div>
-                <span>Portfolio</span>
+                <div class="logo-icon">R</div>
+                <span>Refgiufi</span>
             </div>
             <ul class="nav-links">
                 <li><a href="#about">About</a></li>
                 <li><a href="#skills">Skills</a></li>
+                <li><a href="portfolio">Portfolio</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
             <div class="search-cart">
@@ -983,10 +1412,8 @@
                         </div>
                     </div>
                     <h1>Hello</h1>
+                    <div class="hero-intro">I'm Refgiufi</div>
                     <p class="hero-subtitle">I'm a Software Developer, Data Analyst & Lecturer in Informatics. Passionate about building innovative solutions and educating the next generation of tech professionals.</p>
-                    <a href="#portfolio" class="cta-button">
-                        View My Work →
-                    </a>
                 </div>
                 <div class="hero-right">
                     <div class="hero-image">
@@ -1004,12 +1431,12 @@
                 <h2>About Me</h2>
                 <div class="about-profile-wrapper">
                     <div class="profile-image">
-                        <img src="assets/images/profile.png" alt="Profile">
+                        <img src="assets/images/avatar.png" alt="Profile">
                     </div>
                     <div class="profile-info">
                         <div class="profile-stat-box">
-                            <div class="profile-stat-number">95%</div>
-                            <div class="profile-stat-text">Student satisfaction rate & successful project delivery</div>
+                            <div class="profile-stat-number">5+</div>
+                            <div class="profile-stat-text">Years of experience in tech and education</div>
                         </div>
                     </div>
                 </div>
@@ -1018,15 +1445,15 @@
                 <div class="about-card">
                     <div class="about-icon"></div>
                     <div class="about-text">
-                        <h3>As a Software Developer & Data Analyst, I specialize in</h3>
-                        <p>Building scalable web applications, analyzing complex datasets, and creating data-driven solutions. My expertise spans full-stack development, machine learning, data visualization, and business intelligence to help organizations make informed decisions.</p>
+                        <h3>Software Development & Data Analysis</h3>
+                        <p>I work with web technologies, databases, and data analysis tools to build practical solutions. My focus is on writing clean code and turning data into useful insights for decision-making.</p>
                     </div>
                 </div>
                 <div class="about-card">
                     <div class="about-icon"></div>
                     <div class="about-text">
-                        <h3>As a Lecturer in Informatics, I'm passionate about</h3>
-                        <p>Educating and mentoring students in programming, data science, and software engineering. I believe in hands-on learning, real-world projects, and staying current with industry trends to prepare students for successful careers in technology.</p>
+                        <h3>Teaching & Mentoring</h3>
+                        <p>I enjoy teaching programming and data science concepts to students. My approach is practical and hands-on, helping students understand both theory and real-world applications.</p>
                     </div>
                 </div>
             </div>
@@ -1038,21 +1465,21 @@
         <div class="skills-container">
             <div class="section-header" style="text-align:left;">
                 <p class="section-subtitle">★ Skills</p>
-                <h2 class="section-title">Core Skills & Tools</h2>
+                <h2 class="section-title">Technologies I Work With</h2>
             </div>
             <div class="skills-grid">
-                <div class="skill-card"><div class="skill-icon">PY</div><div class="skill-info"><div class="skill-name">Python</div><div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">JS</div><div class="skill-info"><div class="skill-name">JavaScript</div><div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">PH</div><div class="skill-info"><div class="skill-name">PHP & Laravel</div><div class="skill-bar"><div class="skill-progress" style="width: 88%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">JV</div><div class="skill-info"><div class="skill-name">Java</div><div class="skill-bar"><div class="skill-progress" style="width: 82%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">SQ</div><div class="skill-info"><div class="skill-name">SQL & Database</div><div class="skill-bar"><div class="skill-progress" style="width: 92%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">ML</div><div class="skill-info"><div class="skill-name">Machine Learning</div><div class="skill-bar"><div class="skill-progress" style="width: 85%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">DV</div><div class="skill-info"><div class="skill-name">Data Visualization</div><div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">PD</div><div class="skill-info"><div class="skill-name">Pandas & NumPy</div><div class="skill-bar"><div class="skill-progress" style="width: 88%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">RX</div><div class="skill-info"><div class="skill-name">React & Vue.js</div><div class="skill-bar"><div class="skill-progress" style="width: 85%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">ND</div><div class="skill-info"><div class="skill-name">Node.js</div><div class="skill-bar"><div class="skill-progress" style="width: 83%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">GT</div><div class="skill-info"><div class="skill-name">Git & GitHub</div><div class="skill-bar"><div class="skill-progress" style="width: 92%"></div></div></div></div>
-                <div class="skill-card"><div class="skill-icon">DK</div><div class="skill-info"><div class="skill-name">Docker & DevOps</div><div class="skill-bar"><div class="skill-progress" style="width: 78%"></div></div></div></div>
+                <div class="skill-item">Python</div>
+                <div class="skill-item">JavaScript</div>
+                <div class="skill-item">PHP & Laravel</div>
+                <div class="skill-item">Java</div>
+                <div class="skill-item">SQL & Databases</div>
+                <div class="skill-item">Machine Learning</div>
+                <div class="skill-item">Data Analysis</div>
+                <div class="skill-item">React & Vue.js</div>
+                <div class="skill-item">Node.js</div>
+                <div class="skill-item">Git & GitHub</div>
+                <div class="skill-item">Docker</div>
+                <div class="skill-item">Data Visualization</div>
             </div>
         </div>
     </section>
@@ -1233,7 +1660,7 @@
                 </div>
             </div>
             <div class="view-more">
-                <a class="btn-view-all" href="/portfolio.html" title="View all portfolio">View all works →</a>
+                <a class="btn-view-all" href="portfolio" title="View all portfolio">View all works →</a>
             </div>
         </div>
     </section>
@@ -1246,7 +1673,7 @@
             <div class="section-header">
                 <h2 class="section-title">Have a Project Idea? Let's Build It Together!</h2>
                 <p style="margin-top: 20px; color: #666; font-size: 15px;">Transforming ideas into innovative software solutions and data-driven insights</p>
-                <a href="#contact" class="cta-banner-button" style="display: inline-block; margin-top: 30px; background: #1a1a1a; color: #fff;">Get in Touch →</a>
+                <a href="https://www.linkedin.com/in/refgiufi/" target="_blank" class="cta-banner-button" style="display: inline-block; margin-top: 30px; background: #1a1a1a; color: #fff;">Get in Touch →</a>
             </div>
         </div>
     </section>
@@ -1258,9 +1685,10 @@
                 <a href="#about">About</a>
                 <a href="#skills">Skills</a>
                 <a href="#contact">Contact</a>
+                <a href="https://github.com/refgiufi" target="_blank">GitHub</a>
             </div>
             <div class="footer-contact">
-                hello@dnhova.com
+                <a href="https://www.linkedin.com/in/refgiufi/" target="_blank" style="color: #fff; text-decoration: none; font-weight: 600;">© 2025 Refgiufi</a>
             </div>
         </div>
     </footer>
