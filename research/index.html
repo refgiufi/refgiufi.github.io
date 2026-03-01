@@ -230,18 +230,9 @@
     </header>
 
     <main class="content-container">
-        <div id="publications-section">
-            <h2 class="section-title">Peer-Reviewed Publications</h2>
-            <div id="publications-container">
-                <p style="text-align: center; padding: 40px; color: #666;">Loading publications...</p>
-            </div>
-        </div>
-
-        <div id="projects-section" style="margin-top: 40px;">
-            <h2 class="section-title">Research Projects</h2>
-            <div id="projects-container">
-                <p style="text-align: center; padding: 40px; color: #666;">Loading projects...</p>
-            </div>
+        <h2 class="section-title">Publications & Research Projects</h2>
+        <div id="research-container">
+            <p style="text-align: center; padding: 40px; color: #666;">Loading research data...</p>
         </div>
     </main>
 
@@ -256,6 +247,8 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Local development config (gitignored) -->
+    <script src="../dev-config.js"></script>
     <script src="../assets/js/config.js"></script>
     <script src="../assets/js/config-loader.js"></script>
     <script>
@@ -269,22 +262,16 @@
         }
 
         async function fetchResearch() {
-            const pubContainer = document.getElementById('publications-container');
-            const projContainer = document.getElementById('projects-container');
+            const container = document.getElementById('research-container');
 
             const { data, error } = await sb.from('research').select('*').order('created_at', { ascending: false });
 
             if (error) {
-                pubContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-                projContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                container.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
                 return;
             }
 
-            const publications = data.filter(r => r.type !== 'Ongoing');
-            const projects = data.filter(r => r.type === 'Ongoing');
-
-            renderItems(pubContainer, publications, 'No publications found.');
-            renderItems(projContainer, projects, 'No ongoing projects found.');
+            renderItems(container, data, 'No research items found.');
         }
 
         function renderItems(container, items, emptyMsg) {
@@ -311,3 +298,4 @@
     </script>
 </body>
 </html>
+

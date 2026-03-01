@@ -184,20 +184,23 @@
 
         .project-card {
             background: #fff;
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-            transition: all 0.4s ease;
-            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
         }
 
         .project-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            transform: translateY(-12px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+            border-color: rgba(0,0,0,0.1);
         }
 
         .project-image {
-            height: 250px;
+            height: 240px;
             background: #f0f0f0;
             position: relative;
             overflow: hidden;
@@ -207,76 +210,287 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.4s ease;
+            transition: transform 0.6s ease;
         }
 
         .project-card:hover .project-image img {
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
 
         .project-tags {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            display: flex;
-            gap: 8px;
+            top: 20px;
+            left: 20px;
+            z-index: 2;
         }
 
         .project-tag {
-            background: rgba(255,255,255,0.9);
-            padding: 4px 10px;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 6px 14px;
+            border-radius: 100px;
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 600;
             color: #1a1a1a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .project-content {
-            padding: 30px;
+            padding: 32px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .project-title {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
             color: #1a1a1a;
+            line-height: 1.3;
         }
 
         .project-description {
-            color: #666;
-            line-height: 1.8;
-            margin-bottom: 25px;
-            font-size: 15px;
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 24px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .project-tech {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
 
         .tech-tag {
-            background: #f8f9fa;
-            color: #1a1a1a;
-            padding: 6px 12px;
-            border-radius: 20px;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 5px 12px;
+            border-radius: 8px;
             font-size: 12px;
             font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .project-card:hover .tech-tag {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .project-gallery-label {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .project-gallery {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin-bottom: 28px;
+            padding-bottom: 4px;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .project-gallery::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        .project-gallery img {
+            height: 70px;
+            width: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: zoom-in;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.05);
+            flex-shrink: 0;
+            filter: grayscale(20%);
+        }
+
+        .project-gallery img:hover {
+            transform: scale(1.08);
+            filter: grayscale(0%);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: #1a1a1a;
         }
 
         .project-links {
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            margin-top: auto;
         }
 
         .project-link {
-            padding: 10px 20px;
-            border-radius: 8px;
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
             text-decoration: none;
             font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-demo {
+            background: #1a1a1a;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-demo:hover {
+            background: #000;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-code {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .btn-code:hover {
+            background: #f8fafc;
+            border-color: #1a1a1a;
+            transform: translateY(-3px);
+        }
+
+        .project-link.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(1);
+            background: #f1f5f9;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+        }
+
+        /* Modal Lightbox */
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 75vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-img {
+            max-width: 100%;
+            max-height: 75vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            object-fit: contain;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-nav:hover { background: rgba(255,255,255,0.2); transform: translateY(-50%) scale(1.1); }
+        .modal-prev { left: -70px; }
+        .modal-next { right: -70px; }
+
+        .modal-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            color: #fff;
+            font-size: 30px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: 0.3s;
+        }
+        .modal-close:hover { opacity: 1; }
+
+        .modal-info {
+            color: #fff;
+            margin-top: 30px;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .modal-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+
+        .modal-thumbnails {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            overflow-x: auto;
+            max-width: 90%;
+            padding: 10px;
+        }
+
+        .modal-thumb {
+            width: 80px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .modal-thumb.active { opacity: 1; border-color: #fff; }
+
+        @media (max-width: 1000px) {
+            .modal-prev { left: 10px; }
+            .modal-next { right: 10px; }
+            .modal-nav { background: rgba(0,0,0,0.5); }
         }
 
         .btn-demo {
@@ -465,12 +679,109 @@
         </div>
     </footer>
 
+    <!-- Project Viewer Modal -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="viewer.close()">&times;</span>
+            <button class="modal-nav modal-prev" onclick="viewer.prev()"><i class="fa-solid fa-chevron-left"></i></button>
+            <img id="modal-img" class="modal-img" src="" alt="">
+            <button class="modal-nav modal-next" onclick="viewer.next()"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="modal-info">
+            <div id="modal-title" class="modal-title"></div>
+            <div id="modal-thumbnails" class="modal-thumbnails"></div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Local development config (gitignored) -->
+    <script src="../dev-config.js"></script>
     <script src="../assets/js/config.js"></script>
     <script src="../assets/js/config-loader.js"></script>
     <script>
         let sb = null;
         let allProjects = [];
+
+        class ProjectViewer {
+            constructor() {
+                this.modal = document.getElementById('project-modal');
+                this.img = document.getElementById('modal-img');
+                this.title = document.getElementById('modal-title');
+                this.thumbs = document.getElementById('modal-thumbnails');
+                this.currentImages = [];
+                this.currentIndex = 0;
+            }
+
+            open(projectId) {
+                // Use loose equality (==) in case ID is a number from DB
+                const project = allProjects.find(p => p.id == projectId);
+                if (!project) {
+                    console.error("Project not found:", projectId);
+                    return;
+                }
+
+                // Collect all images: Main + Gallery
+                this.currentImages = [project.image_url];
+                if (project.screenshots) {
+                    this.currentImages.push(...project.screenshots.split(',').map(s => s.trim()));
+                }
+
+                this.currentIndex = 0;
+                this.title.textContent = project.title;
+                this.modal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Stop scroll
+                this.update();
+            }
+
+            update() {
+                this.img.src = this.currentImages[this.currentIndex];
+                
+                // Update thumbnails
+                this.thumbs.innerHTML = this.currentImages.map((src, idx) => `
+                    <img src="${src}" class="modal-thumb ${idx === this.currentIndex ? 'active' : ''}" 
+                         onclick="viewer.goTo(${idx})">
+                `).join('');
+                
+                // Scroll thumbnail into view
+                const activeThumb = this.thumbs.querySelector('.active');
+                if (activeThumb) activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+
+            next() {
+                this.currentIndex = (this.currentIndex + 1) % this.currentImages.length;
+                this.update();
+            }
+
+            prev() {
+                this.currentIndex = (this.currentIndex - 1 + this.currentImages.length) % this.currentImages.length;
+                this.update();
+            }
+
+            goTo(idx) {
+                this.currentIndex = idx;
+                this.update();
+            }
+
+            close() {
+                this.modal.classList.remove('active');
+                document.body.style.overflow = 'auto'; // Restore scroll
+            }
+        }
+
+        const viewer = new ProjectViewer();
+        window.viewer = viewer; // Ensure it's globally accessible
+
+        // Keyboard & Backdrop Navigation
+        window.addEventListener('keydown', (e) => {
+            if (!document.getElementById('project-modal').classList.contains('active')) return;
+            if (e.key === 'Escape') viewer.close();
+            if (e.key === 'ArrowRight') viewer.next();
+            if (e.key === 'ArrowLeft') viewer.prev();
+        });
+
+        document.getElementById('project-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'project-modal') viewer.close();
+        });
 
         async function init() {
             const loader = new ConfigLoader();
@@ -503,28 +814,54 @@
                 const techTags = (project.tech_stack || '').split(',').map(t => `<span class="tech-tag">${t.trim()}</span>`).join('');
                 const collabTag = project.category === 'collab' ? `
                     <div class="project-tags">
-                        <span class="project-tag" style="background: #1a1a1a; color: #fff;">Collaboration</span>
+                        <span class="project-tag">Collaboration</span>
                     </div>` : '';
                 
                 const roleHtml = project.role ? `
-                    <p class="project-role" style="font-size: 13px; color: #1a1a1a; margin-bottom: 20px; font-weight: 500;">
-                        <span style="color: #666; font-weight: 400;">My Role:</span> ${project.role}
-                    </p>` : '';
+                    <div style="font-size: 13px; color: #1e293b; margin-bottom: 24px; padding: 12px 16px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #1a1a1a;">
+                        <span style="color: #64748b; font-weight: 500;">Role:</span> ${project.role}
+                    </div>` : '';
+
+                const demoUrl = project.demo_url?.trim();
+                const repoUrl = project.repo_url?.trim();
+
+                const dateHtml = project.created_at ? `
+                    <div style="font-size: 12px; color: #94a3b8; font-weight: 500; margin-bottom: 5px;">
+                        <i class="fa-regular fa-calendar" style="margin-right: 4px;"></i> 
+                        ${new Date(project.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </div>` : '';
 
                 return `
                     <div class="project-card" data-category="${project.category}">
-                        <div class="project-image">
+                        <div class="project-image" onclick="viewer.open('${project.id}')" style="cursor: pointer;">
                             <img src="${project.image_url || 'https://via.placeholder.com/600x400'}" alt="${project.title}">
                             ${collabTag}
                         </div>
                         <div class="project-content">
-                            <h3 class="project-title">${project.title}</h3>
+                            ${dateHtml}
+                            <h3 class="project-title" onclick="viewer.open('${project.id}')" style="cursor: pointer;">${project.title}</h3>
                             <p class="project-description">${project.description}</p>
                             ${roleHtml}
                             <div class="project-tech">${techTags}</div>
+                            
+                            ${project.screenshots ? `
+                                <div class="project-gallery-label">
+                                    <i class="fa-solid fa-images"></i> Project Gallery
+                                </div>
+                                <div class="project-gallery">
+                                    ${project.screenshots.split(',').map((src, idx) => `
+                                        <img src="${src.trim()}" onclick="viewer.open('${project.id}'); viewer.goTo(${idx + 1})" alt="Screenshot">
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+
                             <div class="project-links">
-                                <a href="${project.demo_url || '#'}" class="project-link btn-demo" target="_blank">Live Demo</a>
-                                <a href="${project.repo_url || '#'}" class="project-link btn-code" target="_blank">View Code</a>
+                                <a href="${demoUrl || '#'}" class="project-link btn-demo ${!demoUrl ? 'disabled' : ''}" ${demoUrl ? 'target="_blank"' : ''}>
+                                    <i class="fa-solid fa-rocket"></i> Live Demo
+                                </a>
+                                <a href="${repoUrl || '#'}" class="project-link btn-code ${!repoUrl ? 'disabled' : ''}" ${repoUrl ? 'target="_blank"' : ''}>
+                                    <i class="fa-brands fa-github"></i> View Code
+                                </a>
                             </div>
                         </div>
                     </div>

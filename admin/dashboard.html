@@ -157,6 +157,9 @@
         <div class="nav-item" data-table="research" onclick="switchTable('research')">
             <i class="fa-solid fa-microscope"></i> Research Papers
         </div>
+        <a href="../index.html" target="_blank" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05);">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Website
+        </a>
         <div class="nav-item" onclick="logout()">
             <i class="fa-solid fa-right-from-bracket"></i> Logout
         </div>
@@ -252,6 +255,10 @@
                                 <option value="collab">Collaboration</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label>Project Completion Date</label>
+                            <input type="date" id="p-date">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Description</label>
@@ -259,8 +266,9 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>Image URL</label>
-                            <input type="text" id="p-image">
+                            <label>Thumbnail Image</label>
+                            <input type="file" id="p-image-file" accept="image/*" style="margin-bottom: 5px;">
+                            <input type="text" id="p-image" placeholder="Or paste URL here">
                         </div>
                         <div class="form-group">
                             <label>Tech Stack (Comma Separated)</label>
@@ -280,6 +288,11 @@
                     <div class="form-group">
                         <label>Role (For Collaborations)</label>
                         <input type="text" id="p-role">
+                    </div>
+                    <div class="form-group">
+                        <label>Gallery Screenshots</label>
+                        <input type="file" id="p-gallery-files" accept="image/*" multiple style="margin-bottom: 5px;">
+                        <textarea id="p-gallery" rows="2" placeholder="URLs will appear here after upload, or paste manually"></textarea>
                     </div>
                 </div>
 
@@ -343,12 +356,15 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Local development config (gitignored) -->
+    <script src="../dev-config.js"></script>
     <script src="../assets/js/config.js"></script>
     <script src="../assets/js/config-loader.js"></script>
     <script>
         let sb = null;
         let currentTable = 'projects';
         let currentUser = null;
+        let allData = []; // Store fetched data for editing
 
         async function init() {
             try {
@@ -432,25 +448,27 @@
         async function fetchData() {
             const headers = document.getElementById('table-headers');
             const rows = document.getElementById('table-rows');
-            rows.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading...</td></tr>';
+            rows.innerHTML = '<tr><td colspan="5" style="text-align: center;">Loading...</td></tr>';
 
             const { data, error } = await sb.from(currentTable).select('*').order('created_at', { ascending: false });
             if (error) {
-                rows.innerHTML = `<tr><td colspan="4" class="err">${error.message}</td></tr>`;
+                rows.innerHTML = `<tr><td colspan="5" class="err">${error.message}</td></tr>`;
                 return;
             }
 
+            allData = data; // Save for editItem
             document.getElementById('stat-total').textContent = data.length;
 
             if (currentTable === 'projects') {
-                headers.innerHTML = `<th>Title</th><th>Category</th><th>Preview</th><th>Actions</th>`;
+                headers.innerHTML = `<th>Title</th><th>Category</th><th>Date</th><th>Preview</th><th>Actions</th>`;
                 rows.innerHTML = data.map(item => `
                     <tr>
-                        <td><strong>${item.title}</strong></td>
-                        <td>${item.category}</td>
-                        <td><img src="${item.image_url}" style="width: 40px; height: 25px; object-fit: cover; border-radius: 4px;"></td>
+                        <td><strong>${item.title || 'Untitled'}</strong></td>
+                        <td>${item.category || '-'}</td>
+                        <td>${item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</td>
+                        <td><img src="${item.image_url || 'https://via.placeholder.com/40'}" style="width: 40px; height: 25px; object-fit: cover; border-radius: 4px;"></td>
                         <td class="actions">
-                            <button class="btn btn-ghost" onclick='editItem(${JSON.stringify(item).replace(/'/g, "&#39;")})'><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-ghost" onclick="editItem('${item.id}')"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn btn-ghost" onclick="deleteItem('${item.id}')"><i class="fa-solid fa-trash" style="color:var(--err)"></i></button>
                         </td>
                     </tr>`).join('');
@@ -458,11 +476,11 @@
                 headers.innerHTML = `<th>Paper Title</th><th>Type</th><th>Journal</th><th>Actions</th>`;
                 rows.innerHTML = data.map(item => `
                     <tr>
-                        <td><strong>${item.title}</strong></td>
-                        <td>${item.type}</td>
-                        <td>${item.journal}</td>
+                        <td><strong>${item.title || 'Untitled'}</strong></td>
+                        <td>${item.type || '-'}</td>
+                        <td>${item.journal || '-'}</td>
                         <td class="actions">
-                            <button class="btn btn-ghost" onclick='editItem(${JSON.stringify(item).replace(/'/g, "&#39;")})'><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-ghost" onclick="editItem('${item.id}')"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn btn-ghost" onclick="deleteItem('${item.id}')"><i class="fa-solid fa-trash" style="color:var(--err)"></i></button>
                         </td>
                     </tr>`).join('');
@@ -485,6 +503,12 @@
                 document.getElementById('p-demo').value = item?.demo_url || '';
                 document.getElementById('p-repo').value = item?.repo_url || '';
                 document.getElementById('p-role').value = item?.role || '';
+                document.getElementById('p-gallery').value = item?.screenshots || '';
+                if (item?.created_at) {
+                    document.getElementById('p-date').value = new Date(item.created_at).toISOString().split('T')[0];
+                } else {
+                    document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
+                }
             } else {
                 document.getElementById('research-form-fields').classList.remove('hidden');
                 document.getElementById('item-id').value = item?.id || '';
@@ -498,39 +522,80 @@
             }
         }
 
+        function editItem(id) { 
+            const item = allData.find(d => d.id == id);
+            if (item) showForm(item); 
+        }
+
         function hideForm() { document.getElementById('form-card').classList.add('hidden'); }
+
+        async function handleUploads() {
+            if (currentTable !== 'projects') return {};
+            
+            const results = {};
+            const mainFile = document.getElementById('p-image-file').files[0];
+            const galleryFiles = document.getElementById('p-gallery-files').files;
+
+            if (mainFile) {
+                const path = `main_${Date.now()}_${mainFile.name}`;
+                const { data, error } = await sb.storage.from('portfolio').upload(path, mainFile);
+                if (error) throw error;
+                const { data: { publicUrl } } = sb.storage.from('portfolio').getPublicUrl(path);
+                results.image_url = publicUrl;
+            }
+
+            if (galleryFiles.length > 0) {
+                const urls = [];
+                for (const file of galleryFiles) {
+                    const path = `gallery_${Date.now()}_${file.name}`;
+                    const { data, error } = await sb.storage.from('portfolio').upload(path, file);
+                    if (error) throw error;
+                    const { data: { publicUrl } } = sb.storage.from('portfolio').getPublicUrl(path);
+                    urls.push(publicUrl);
+                }
+                const existing = document.getElementById('p-gallery').value;
+                results.screenshots = existing ? (existing + ',' + urls.join(',')) : urls.join(',');
+            }
+
+            return results;
+        }
 
         async function saveItem() {
             const id = document.getElementById('item-id').value;
             const msg = document.getElementById('form-msg');
-            msg.textContent = "Saving...";
+            msg.textContent = "Processing uploads...";
             
-            let payload = currentTable === 'projects' ? {
-                title: document.getElementById('p-title').value,
-                category: document.getElementById('p-category').value,
-                description: document.getElementById('p-desc').value,
-                image_url: document.getElementById('p-image').value,
-                tech_stack: document.getElementById('p-tech').value,
-                demo_url: document.getElementById('p-demo').value,
-                repo_url: document.getElementById('p-repo').value,
-                role: document.getElementById('p-role').value
-            } : {
-                title: document.getElementById('r-title').value,
-                date_string: document.getElementById('r-date').value,
-                type: document.getElementById('r-type').value,
-                journal: document.getElementById('r-journal').value,
-                authors: document.getElementById('r-authors').value,
-                full_paper_url: document.getElementById('r-url').value,
-                doi_url: document.getElementById('r-doi').value
-            };
-
             try {
+                const uploads = await handleUploads();
+                
+                let payload = currentTable === 'projects' ? {
+                    title: document.getElementById('p-title').value,
+                    category: document.getElementById('p-category').value,
+                    description: document.getElementById('p-desc').value,
+                    image_url: uploads.image_url || document.getElementById('p-image').value,
+                    tech_stack: document.getElementById('p-tech').value,
+                    demo_url: document.getElementById('p-demo').value,
+                    repo_url: document.getElementById('p-repo').value,
+                    role: document.getElementById('p-role').value,
+                    screenshots: uploads.screenshots || document.getElementById('p-gallery').value,
+                    created_at: document.getElementById('p-date').value ? new Date(document.getElementById('p-date').value).toISOString() : new Date().toISOString()
+                } : {
+                    title: document.getElementById('r-title').value,
+                    date_string: document.getElementById('r-date').value,
+                    type: document.getElementById('r-type').value,
+                    journal: document.getElementById('r-journal').value,
+                    authors: document.getElementById('r-authors').value,
+                    full_paper_url: document.getElementById('r-url').value,
+                    doi_url: document.getElementById('r-doi').value
+                };
+
+                msg.textContent = "Saving data...";
                 const { error } = id ? await sb.from(currentTable).update(payload).eq('id', id) : await sb.from(currentTable).insert([payload]);
                 if (error) throw error;
                 msg.textContent = "Success!";
                 setTimeout(() => { hideForm(); fetchData(); }, 1000);
             } catch (err) {
-                msg.textContent = err.message;
+                msg.textContent = "Error: " + err.message;
             }
         }
 
