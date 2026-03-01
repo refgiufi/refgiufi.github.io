@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio - Refgiufi</title>
     <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -464,6 +465,7 @@
         }
 
         .modal-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        .modal-description { font-size: 16px; color: #ccc; margin-bottom: 20px; line-height: 1.6; padding: 0 20px; }
 
         .modal-thumbnails {
             display: flex;
@@ -689,6 +691,7 @@
         </div>
         <div class="modal-info">
             <div id="modal-title" class="modal-title"></div>
+            <div id="modal-description" class="modal-description"></div>
             <div id="modal-thumbnails" class="modal-thumbnails"></div>
         </div>
     </div>
@@ -707,6 +710,7 @@
                 this.modal = document.getElementById('project-modal');
                 this.img = document.getElementById('modal-img');
                 this.title = document.getElementById('modal-title');
+                this.description = document.getElementById('modal-description');
                 this.thumbs = document.getElementById('modal-thumbnails');
                 this.currentImages = [];
                 this.currentIndex = 0;
@@ -728,6 +732,7 @@
 
                 this.currentIndex = 0;
                 this.title.textContent = project.title;
+                this.description.textContent = project.description || '';
                 this.modal.classList.add('active');
                 document.body.style.overflow = 'hidden'; // Stop scroll
                 this.update();
@@ -735,6 +740,13 @@
 
             update() {
                 this.img.src = this.currentImages[this.currentIndex];
+                
+                // Show description only for the first image (index 0)
+                if (this.currentIndex === 0) {
+                    this.description.style.display = 'block';
+                } else {
+                    this.description.style.display = 'none';
+                }
                 
                 // Update thumbnails
                 this.thumbs.innerHTML = this.currentImages.map((src, idx) => `

@@ -142,6 +142,54 @@
         .status-msg { margin-top: 15px; font-size: 14px; }
         .ok { color: var(--ok); }
         .err { color: var(--err); }
+        /* Image Manager Styles (Compact List) */
+        .image-manager-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .image-preview-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #f1f5f9;
+        }
+        .image-preview-row img {
+            width: 40px; height: 40px; 
+            object-fit: cover; 
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+        .image-path-text {
+            flex: 1;
+            font-size: 11px;
+            color: #475569;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .preview-delete-btn {
+            width: 28px; height: 28px;
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .preview-delete-btn:hover { background: #ef4444; color: #fff; }
     </style>
 </head>
 <body>
@@ -269,6 +317,7 @@
                             <label>Thumbnail Image</label>
                             <input type="file" id="p-image-file" accept="image/*" style="margin-bottom: 5px;">
                             <input type="text" id="p-image" placeholder="Or paste URL here">
+                            <div id="main-image-preview"></div>
                         </div>
                         <div class="form-group">
                             <label>Tech Stack (Comma Separated)</label>
@@ -293,6 +342,7 @@
                         <label>Gallery Screenshots</label>
                         <input type="file" id="p-gallery-files" accept="image/*" multiple style="margin-bottom: 5px;">
                         <textarea id="p-gallery" rows="2" placeholder="URLs will appear here after upload, or paste manually"></textarea>
+                        <div id="gallery-preview"></div>
                     </div>
                 </div>
 
@@ -491,6 +541,7 @@
             document.getElementById('form-card').classList.remove('hidden');
             document.getElementById('project-form-fields').classList.add('hidden');
             document.getElementById('research-form-fields').classList.add('hidden');
+            document.getElementById('form-msg').textContent = "";
             
             if (currentTable === 'projects') {
                 document.getElementById('project-form-fields').classList.remove('hidden');
@@ -509,6 +560,7 @@
                 } else {
                     document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
                 }
+                updateImageManager();
             } else {
                 document.getElementById('research-form-fields').classList.remove('hidden');
                 document.getElementById('item-id').value = item?.id || '';
@@ -522,12 +574,109 @@
             }
         }
 
+        // --- Manual Image Manager Logic (Compact List) ---
+        function updateImageManager() {
+            const mainUrl = document.getElementById('p-image').value;
+            const galleryUrls = document.getElementById('p-gallery').value;
+            const mainPreview = document.getElementById('main-image-preview');
+            const galleryPreview = document.getElementById('gallery-preview');
+
+            const getPath = (url) => url.split('/').pop();
+
+            mainPreview.innerHTML = mainUrl && mainUrl.startsWith('http') ? `
+                <div class="image-manager-list">
+                    <div class="image-preview-row">
+                        <img src="${mainUrl}">
+                        <span class="image-path-text">${getPath(mainUrl)}</span>
+                        <button class="preview-delete-btn" onclick="removeSingleImage('main', '${mainUrl}')" title="Delete Permanent">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>` : '';
+
+            const urls = galleryUrls ? galleryUrls.split(',').map(s => s.trim()).filter(s => s.startsWith('http')) : [];
+            galleryPreview.innerHTML = urls.length > 0 ? `
+                <div class="image-manager-list">
+                    ${urls.map((url) => `
+                        <div class="image-preview-row">
+                            <img src="${url}">
+                            <span class="image-path-text">${getPath(url)}</span>
+                            <button class="preview-delete-btn" onclick="removeSingleImage('gallery', '${url}')" title="Delete Permanent">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>` : '';
+        }
+
+        async function removeSingleImage(type, url) {
+            if (!confirm('Are you sure? This will delete the file from storage PERMANENTLY.')) return;
+
+            const path = extractPathFromUrl(url);
+            if (path) {
+                const { error } = await sb.storage.from('portfolio').remove([path]);
+                if (error) {
+                    alert('Could not delete from storage: ' + error.message);
+                }
+            }
+
+            // Update Form
+            if (type === 'main') {
+                document.getElementById('p-image').value = '';
+            } else {
+                const existing = document.getElementById('p-gallery').value.split(',').map(s => s.trim());
+                const filtered = existing.filter(u => u !== url);
+                document.getElementById('p-gallery').value = filtered.join(',');
+            }
+            
+            updateImageManager();
+            alert('File deleted successfully. Don\'t forget to Save Changes to update the project data.');
+        }
+
         function editItem(id) { 
             const item = allData.find(d => d.id == id);
             if (item) showForm(item); 
         }
 
         function hideForm() { document.getElementById('form-card').classList.add('hidden'); }
+
+        // --- Image Resizing Logic ---
+        async function resizeImage(file, maxWidth = 1200, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxWidth) { // Check height against max too
+                                width *= maxWidth / height;
+                                height = maxWidth;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, 'image/jpeg', quality);
+                    };
+                };
+            });
+        }
 
         async function handleUploads() {
             if (currentTable !== 'projects') return {};
@@ -536,9 +685,12 @@
             const mainFile = document.getElementById('p-image-file').files[0];
             const galleryFiles = document.getElementById('p-gallery-files').files;
 
+            const getRandomName = (prefix) => `${prefix}_${crypto.randomUUID()}.jpg`;
+
             if (mainFile) {
-                const path = `main_${Date.now()}_${mainFile.name}`;
-                const { data, error } = await sb.storage.from('portfolio').upload(path, mainFile);
+                const resizedBlob = await resizeImage(mainFile);
+                const path = getRandomName('main');
+                const { error } = await sb.storage.from('portfolio').upload(path, resizedBlob, { contentType: 'image/jpeg' });
                 if (error) throw error;
                 const { data: { publicUrl } } = sb.storage.from('portfolio').getPublicUrl(path);
                 results.image_url = publicUrl;
@@ -547,8 +699,9 @@
             if (galleryFiles.length > 0) {
                 const urls = [];
                 for (const file of galleryFiles) {
-                    const path = `gallery_${Date.now()}_${file.name}`;
-                    const { data, error } = await sb.storage.from('portfolio').upload(path, file);
+                    const resizedBlob = await resizeImage(file);
+                    const path = getRandomName('gallery');
+                    const { error } = await sb.storage.from('portfolio').upload(path, resizedBlob, { contentType: 'image/jpeg' });
                     if (error) throw error;
                     const { data: { publicUrl } } = sb.storage.from('portfolio').getPublicUrl(path);
                     urls.push(publicUrl);
@@ -599,8 +752,41 @@
             }
         }
 
+        // Storage Cleanup Helpers
+        function extractPathFromUrl(url) {
+            if (!url || !url.includes('/storage/v1/object/public/portfolio/')) return null;
+            return url.split('/storage/v1/object/public/portfolio/')[1];
+        }
+
+        async function deleteFilesFromStorage(urls) {
+            const paths = urls.map(extractPathFromUrl).filter(p => p !== null);
+            if (paths.length === 0) return;
+            
+            try {
+                const { error } = await sb.storage.from('portfolio').remove(paths);
+                if (error) console.error("Storage cleanup failed:", error);
+            } catch (err) {
+                console.error("Cleanup error:", err);
+            }
+        }
+
         async function deleteItem(id) {
-            if (confirm('Delete this?')) {
+            if (confirm('Delete this item? Associated images will also be removed from storage.')) {
+                // Cleanup storage if it's a project
+                if (currentTable === 'projects') {
+                    const item = allData.find(d => d.id == id);
+                    if (item) {
+                        const urlsToDelete = [];
+                        if (item.image_url) urlsToDelete.push(item.image_url);
+                        if (item.screenshots) {
+                            urlsToDelete.push(...item.screenshots.split(',').map(s => s.trim()));
+                        }
+                        if (urlsToDelete.length > 0) {
+                            await deleteFilesFromStorage(urlsToDelete);
+                        }
+                    }
+                }
+
                 await sb.from(currentTable).delete().eq('id', id);
                 fetchData();
             }
