@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Refgiufi - Software Developer, Data Analyst & Lecturer</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <style>
       * {
         margin: 0;
@@ -1917,51 +1918,12 @@
           <p class="section-subtitle">★ Portfolio</p>
           <h2 class="section-title">Featured Projects</h2>
         </div>
-        <div class="works-grid">
-          <div class="work-card">
-            <div class="work-image">
-              <img
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop"
-                alt="Business Intelligence Dashboard"
-              />
-            </div>
-            <div class="work-info">
-              <div class="work-title">Business Intelligence Dashboard</div>
-              <div class="work-meta">→ Data Analytics</div>
-            </div>
-          </div>
-          <div class="work-card">
-            <div class="work-image">
-              <img
-                src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=600&h=400&fit=crop"
-                alt="E-Learning Management System"
-              />
-            </div>
-            <div class="work-info">
-              <div class="work-title">E-Learning Management System</div>
-              <div class="work-meta">→ Full-Stack Development</div>
-            </div>
-          </div>
-          <div class="work-card">
-            <div class="work-image">
-              <img
-                src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop"
-                alt="ML Prediction Engine"
-              />
-            </div>
-            <div class="work-info">
-              <div class="work-title">Machine Learning Prediction Engine</div>
-              <div class="work-meta">→ AI/ML</div>
-            </div>
-          </div>
+        <div class="works-grid" id="latest-works-container">
+          <!-- Data will be loaded from Supabase -->
+          <p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">Loading latest projects...</p>
         </div>
-        <div class="view-more">
-          <a
-            class="btn-view-all"
-            href="portfolio/"
-            title="View all portfolio"
-            >View all works →</a
-          >
+        <div style="text-align: center; margin-top: 50px;">
+          <a href="portfolio/" class="btn-primary">View All Projects</a>
         </div>
       </div>
     </section>
@@ -1996,34 +1958,94 @@
     </section>
 
     <!-- Footer -->
-    <footer id="contact">
+    <footer>
       <div class="footer-container">
-        <div class="footer-left">
-          <div class="footer-links">
-            <a href="#about">About</a>
-            <a href="portfolio/">Portfolio</a>
-            <a href="research/">Research</a>
-            <a href="contact/">Contact</a>
-            <a href="https://github.com/refgiufi" target="_blank">GitHub</a>
+        <div class="footer-top">
+          <div class="footer-brand">
+            <div class="logo">
+              <div class="logo-icon">R</div>
+              <span>Refgiufi</span>
+            </div>
+            <p style="margin-top: 20px; color: #999; max-width: 300px">
+              Software Developer, Data Analyst, and Lecturer dedicated to
+              crafting digital solutions and inspiring future tech talent.
+            </p>
           </div>
-          <div class="footer-credit">
-            <span style="color: #666; font-size: 11px"
-              >Built with AI assistance</span
-            >
+
+          <div class="footer-grid">
+            <div class="footer-col">
+              <h4>Navigation</h4>
+              <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="portfolio/">Portfolio</a></li>
+                <li><a href="research/">Research</a></li>
+                <li><a href="contact/">Contact</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Services</h4>
+              <ul>
+                <li><a href="contact/">Web Development</a></li>
+                <li><a href="contact/">Data Analysis</a></li>
+                <li><a href="contact/">Research Collaboration</a></li>
+                <li><a href="contact/">Private Mentoring</a></li>
+              </ul>
+            </div>
+            <div class="footer-col" id="contact">
+              <h4>Contact</h4>
+              <ul>
+                <li><a href="https://wa.me/yournumber" target="_blank">WhatsApp</a></li>
+                <li><a href="mailto:email@domain.com">Email</a></li>
+                <li><a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a></li>
+                <li><a href="admin/dashboard.html" style="opacity: 0.3; font-size: 10px;">Admin Dashboard</a></li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div class="footer-contact">
-          <a
-            href="https://www.linkedin.com/in/refgiufi/"
-            target="_blank"
-            style="color: #fff; text-decoration: none; font-weight: 600"
-            >© 2025 Refgiufi</a
-          >
+
+        <div class="footer-bottom">
+          <p>© 2025 Refgiufi. All rights reserved.</p>
         </div>
       </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config-loader.js"></script>
     <script>
+      async function initLatestWorks() {
+        try {
+          const loader = new ConfigLoader();
+          await loader.loadConfig();
+          const sb = loader.createSupabaseClient();
+          
+          const container = document.getElementById('latest-works-container');
+          if (!container) return;
+
+          const { data, error } = await sb.from('projects').select('*').order('created_at', { ascending: false }).limit(3);
+
+          if (error || !data || data.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">Check back soon for new projects!</p>';
+            return;
+          }
+
+          container.innerHTML = data.map(project => `
+            <div class="work-card" onclick="window.location.href='portfolio/'" style="cursor: pointer;">
+              <div class="work-image">
+                <img src="${project.image_url || 'https://via.placeholder.com/600x400'}" alt="${project.title}" />
+              </div>
+              <div class="work-info">
+                <div class="work-title" style="font-weight: 600; font-size: 16px;">${project.title}</div>
+                <div class="work-meta" style="color: #666; font-size: 13px;">→ ${project.category.charAt(0).toUpperCase() + project.category.slice(1)}</div>
+              </div>
+            </div>
+          `).join('');
+        } catch (e) {
+          console.error("Latest works fail:", e);
+        }
+      }
+
+      initLatestWorks();
+
       // Smooth scrolling
       document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener("click", function (e) {

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Research & Publications - Refgiufi</title>
+    <link rel="icon" type="image/png" href="../favicon.png">
     <style>
         * {
             margin: 0;
@@ -229,45 +230,19 @@
     </header>
 
     <main class="content-container">
-        <h2 class="section-title">Peer-Reviewed Publications</h2>
-
-        <!-- Publication 1 -->
-        <div class="pub-card">
-            <span class="pub-date">2024 • Journal Article</span>
-            <h3 class="pub-title">Optimizing Distributed Database Systems for Real-time Data Analytics in IoT Environments</h3>
-            <p class="pub-journal">International Journal of Computer Science and Information Security</p>
-            <p class="pub-authors">Refgiufi, A., Doe, J., & Smith, K.</p>
-            <div class="pub-links">
-                <a href="#" class="pub-link">Read Full Paper →</a>
-                <a href="#" class="pub-link">DOI: 10.1234/ijcsis.2024.01</a>
+        <div id="publications-section">
+            <h2 class="section-title">Peer-Reviewed Publications</h2>
+            <div id="publications-container">
+                <p style="text-align: center; padding: 40px; color: #666;">Loading publications...</p>
             </div>
         </div>
 
-        <!-- Publication 2 -->
-        <div class="pub-card">
-            <span class="pub-date">2023 • Conference Paper</span>
-            <h3 class="pub-title">Machine Learning Approaches for Predictive Maintenance in Manufacturing: A Comparative Study</h3>
-            <p class="pub-journal">Proceedings of the International Conference on AI & Data Science (ICADS)</p>
-            <p class="pub-authors">Refgiufi, A., & Lee, S.</p>
-            <div class="pub-links">
-                <a href="#" class="pub-link">View Summary →</a>
-                <a href="#" class="pub-link">IEEE Xplore</a>
+        <div id="projects-section" style="margin-top: 40px;">
+            <h2 class="section-title">Research Projects</h2>
+            <div id="projects-container">
+                <p style="text-align: center; padding: 40px; color: #666;">Loading projects...</p>
             </div>
         </div>
-
-        <h2 class="section-title" style="margin-top: 40px;">Research Projects</h2>
-        
-        <!-- Project 1 -->
-        <div class="pub-card">
-            <span class="pub-date">Ongoing • Research Project</span>
-            <h3 class="pub-title">Next-Generation E-Learning Frameworks using Adaptive AI Algorithms</h3>
-            <p class="pub-authors">Principal Investigator: Refgiufi</p>
-            <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Investigating how generative AI can personalizes course materials for undergraduate informatics students based on individual learning curves.</p>
-            <div class="pub-links">
-                <a href="#" class="pub-link">Project Details →</a>
-            </div>
-        </div>
-
     </main>
 
     <footer>
@@ -279,5 +254,59 @@
         </div>
         <p style="font-size: 12px; color: #666;">© 2025 Refgiufi • Software Developer, Data Analyst & Lecturer</p>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/config-loader.js"></script>
+    <script>
+        let sb = null;
+
+        async function init() {
+            const loader = new ConfigLoader();
+            await loader.loadConfig();
+            sb = loader.createSupabaseClient();
+            await fetchResearch();
+        }
+
+        async function fetchResearch() {
+            const pubContainer = document.getElementById('publications-container');
+            const projContainer = document.getElementById('projects-container');
+
+            const { data, error } = await sb.from('research').select('*').order('created_at', { ascending: false });
+
+            if (error) {
+                pubContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                projContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                return;
+            }
+
+            const publications = data.filter(r => r.type !== 'Ongoing');
+            const projects = data.filter(r => r.type === 'Ongoing');
+
+            renderItems(pubContainer, publications, 'No publications found.');
+            renderItems(projContainer, projects, 'No ongoing projects found.');
+        }
+
+        function renderItems(container, items, emptyMsg) {
+            if (items.length === 0) {
+                container.innerHTML = `<p style="text-align: center; padding: 20px; color: #666;">${emptyMsg}</p>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="pub-card">
+                    <span class="pub-date">${item.date_string || ''}</span>
+                    <h3 class="pub-title">${item.title}</h3>
+                    ${item.journal ? `<p class="pub-journal">${item.journal}</p>` : ''}
+                    <p class="pub-authors">${item.authors || ''}</p>
+                    <div class="pub-links">
+                        ${item.full_paper_url ? `<a href="${item.full_paper_url}" class="pub-link" target="_blank">View Details →</a>` : ''}
+                        ${item.doi_url ? `<a href="${item.doi_url}" class="pub-link" target="_blank">DOI Link</a>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        init();
+    </script>
 </body>
 </html>
