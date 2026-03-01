@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact & Collaboration - Refgiufi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+            background: #fafafa;
+        }
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+        }
+        .logo { font-size: 20px; font-weight: 600; text-decoration: none; color: #1a1a1a; display: flex; align-items: center; gap: 8px; }
+        .logo-icon { width: 32px; height: 32px; background: #1a1a1a; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .nav-links { display: flex; list-style: none; gap: 30px; }
+        .nav-links a { text-decoration: none; color: #666; font-size: 14px; font-weight: 500; }
+        .nav-links a:hover, .nav-links a.active { color: #1a1a1a; }
+
+        .header { padding: 140px 30px 60px; text-align: center; background: #fff; }
+        .header h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 300; margin-bottom: 15px; }
+        .header p { color: #666; max-width: 600px; margin: 0 auto; }
+
+        .container { max-width: 1100px; margin: 40px auto 100px; padding: 0 30px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px; }
+
+        .contact-info h2 { font-size: 24px; margin-bottom: 30px; font-weight: 600; }
+        .service-list { margin-bottom: 40px; }
+        .service-item { margin-bottom: 25px; padding-left: 20px; border-left: 3px solid #eee; transition: border-color 0.3s; }
+        .service-item:hover { border-color: #1a1a1a; }
+        .service-item h3 { font-size: 16px; margin-bottom: 5px; }
+        .service-item p { font-size: 14px; color: #666; }
+
+        .contact-card { background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #333; }
+        input, select, textarea {
+            width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; transition: all 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #1a1a1a; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+        .btn-submit {
+            width: 100%; background: #1a1a1a; color: #fff; padding: 14px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s, background 0.2s; margin-top: 10px;
+        }
+        .btn-submit:hover { background: #333; transform: translateY(-2px); }
+
+        .social-links { display: flex; gap: 15px; margin-top: 30px; }
+        .social-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #1a1a1a; transition: all 0.3s;
+        }
+        .social-btn:hover { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; gap: 40px; }
+            .nav-links { display: none; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="../index.html" class="logo"><div class="logo-icon">R</div><span>Refgiufi</span></a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../portfolio/">Portfolio</a></li>
+                <li><a href="../research/">Research</a></li>
+                <li><a href="./" class="active">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="header">
+        <h1>Let's Work Together</h1>
+        <p>Whether you have a project idea, research collaboration, or just want to chat about tech & education, I'm all ears.</p>
+    </header>
+
+    <div class="container">
+        <div class="contact-info">
+            <h2>Collaboration Opportunities</h2>
+            <div class="service-list">
+                <div class="service-item">
+                    <h3>Software Development</h3>
+                    <p>Building scalable web apps, custom dashboards, and automation tools for your business.</p>
+                </div>
+                <div class="service-item">
+                    <h3>Data Analysis & ML</h3>
+                    <p>Turning raw data into actionable insights and building predictive models for smarter decisions.</p>
+                </div>
+                <div class="service-item">
+                    <h3>Academic Research</h3>
+                    <p>Collaborative research papers, educational workshops, and curriculum development.</p>
+                </div>
+                <div class="service-item">
+                    <h3>Mentoring & Training</h3>
+                    <p>Private training for development teams or mentoring for informatics students.</p>
+                </div>
+            </div>
+
+            <h2>Find Me On</h2>
+            <div class="social-links">
+                <a href="https://linkedin.com/in/refgiufi" target="_blank" class="social-btn" title="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                </a>
+                <a href="https://github.com/refgiufi" target="_blank" class="social-btn" title="GitHub">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <a href="mailto:hello@refgiufi.com" class="social-btn" title="Email">
+                    <i class="fa-solid fa-envelope"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="contact-card">
+            <form id="whatsappForm">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Interested In</label>
+                    <select id="interest" required>
+                        <option value="" disabled selected>Select an option</option>
+                        <option value="Web Development Project">Web Development Project</option>
+                        <option value="Data Analysis / ML">Data Analysis / ML</option>
+                        <option value="Research Collaboration">Research Collaboration</option>
+                        <option value="Mentoring / Training">Mentoring / Training</option>
+                        <option value="Other Inquiry">Other Inquiry</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="message" rows="5" placeholder="Tell me about your project..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Send via WhatsApp →</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('whatsappForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Your WhatsApp Number (Format: 628xxx...)
+            const phoneNumber = "6289657501202"; // GANTI DENGAN NOMOR WA KAMU
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const interest = document.getElementById('interest').value;
+            const message = document.getElementById('message').value;
+            
+            const text = `Halo Refgiufi, saya *${name}* (${email}).%0A%0A` +
+                         `Saya tertarik mengenai: *${interest}*%0A%0A` +
+                         `Pesan:%0A${message}`;
+            
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${text}`;
+            
+            window.open(whatsappUrl, '_blank');
+        });
+    </script>
+
+    <footer style="padding: 40px; text-align: center; border-top: 1px solid #eee;">
+        <p style="font-size: 13px; color: #999;">© 2025 Refgiufi • Software Developer, Data Analyst & Lecturer</p>
+    </footer>
+</body>
+</html>
